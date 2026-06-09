@@ -78,7 +78,7 @@ export default function QuickVendorModal({ isOpen, onClose, onSuccess }) {
         <div className="fixed inset-0 z-50 flex justify-end overflow-hidden">
             {/* Backdrop overlay */}
             <div 
-                className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] transition-opacity duration-300 ease-in-out" 
+                className="absolute inset-0 bg-slate-900/40  transition-opacity duration-300 ease-in-out" 
                 onClick={onClose} 
             />
             

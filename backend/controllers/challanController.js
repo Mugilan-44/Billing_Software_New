@@ -71,7 +71,7 @@ export const createChallan = async (req, res) => {
         for (const i of req.body.items || []) {
             const dbItem = await findDocument(Item, i.itemId, req.user);
             if (dbItem && dbItem.type === 'Goods') {
-                if (dbItem.stockQuantity < i.quantity) {
+                if (!req.body.allowNegativeStock && dbItem.stockQuantity < i.quantity) {
                     return res.status(400).json({
                         success: false,
                         message: `Insufficient stock for item '${dbItem.name}'. Available: ${dbItem.stockQuantity}, Requested: ${i.quantity}`,
@@ -160,7 +160,7 @@ export const updateChallan = async (req, res) => {
         for (const i of newItems) {
             const dbItem = await findDocument(Item, i.itemId, req.user);
             if (dbItem && dbItem.type === 'Goods') {
-                if (dbItem.stockQuantity < i.quantity) {
+                if (!req.body.allowNegativeStock && dbItem.stockQuantity < i.quantity) {
                     // Rollback previously restored items (re-deduct them)
                     for (const prev of challan.items) {
                         const prevDbItem = await findDocument(Item, prev.itemId, req.user);

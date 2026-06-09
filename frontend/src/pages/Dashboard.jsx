@@ -866,7 +866,7 @@ const Dashboard = () => {
             {showOnboarding && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     {/* Backdrop */}
-                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={handleSkipOnboarding} />
+                    <div className="absolute inset-0 bg-slate-900/60 " onClick={handleSkipOnboarding} />
 
                     {/* Modal container */}
                     <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 md:p-8 animate-in zoom-in-95 duration-250 flex flex-col">
@@ -1086,7 +1086,7 @@ const Dashboard = () => {
             {showWelcome && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     {/* Backdrop */}
-                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={handleDismissWelcome} />
+                    <div className="absolute inset-0 bg-slate-900/60 " onClick={handleDismissWelcome} />
 
                     {/* Modal container */}
                     <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-100 p-6 md:p-8 animate-in zoom-in-95 duration-250 flex flex-col items-center text-center">

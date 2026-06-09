@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, createRoutesFromElements, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { useContext, useEffect } from 'react';
 import { AuthContext } from './context/AuthContext';
@@ -103,16 +103,11 @@ const SuperAdminRoute = ({ children }) => {
   return children;
 };
 
-function App() {
-  return (
-    <ErrorBoundary>
-      <ToastProvider>
-        <AxiosInterceptor>
-          <AuthProvider>
-            <Router>
-        <Routes>
-          {/* ─── Public Routes ────────────── */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <>
+      {/* ─── Public Routes ────────────── */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/public/invoice/:id" element={<PublicInvoice />} />
@@ -199,8 +194,17 @@ function App() {
 
           {/* ─── Catch-all ────────────────── */}
           <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-            </Router>
+    </>
+  )
+);
+
+function App() {
+  return (
+    <ErrorBoundary>
+      <ToastProvider>
+        <AxiosInterceptor>
+          <AuthProvider>
+            <RouterProvider router={router} />
           </AuthProvider>
         </AxiosInterceptor>
       </ToastProvider>

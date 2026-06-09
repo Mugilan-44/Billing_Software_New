@@ -417,7 +417,7 @@ const CreditNoteViewer = () => {
 
             {/* ── Email Modal ── */}
             {isEmailModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in no-print">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60  p-4 animate-fade-in no-print">
                     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg border border-slate-100 overflow-hidden transform transition-all scale-100 duration-300">
                         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                             <div>

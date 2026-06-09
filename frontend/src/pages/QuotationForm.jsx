@@ -6,6 +6,7 @@ import SearchableDropdown from '../components/SearchableDropdown';
 import QuickCustomerModal from '../components/QuickCustomerModal';
 import QuickItemModal from '../components/QuickItemModal';
 import BulkItemModal from '../components/BulkItemModal';
+import UnsavedChangesWarning from '../components/UnsavedChangesWarning';
 import { AuthContext } from '../context/AuthContext';
 
 const InputRow = ({ label, required, children, helper }) => (
@@ -429,6 +430,7 @@ const QuotationForm = () => {
 
     return (
         <div className="max-w-6xl mx-auto bg-white shadow-sm rounded-[20px] border border-slate-200 mt-6 mb-12 overflow-hidden">
+            <UnsavedChangesWarning isDirty={isFormDirty && !loading && !error} />
             <div className="flex items-center justify-between bg-slate-50/50 border-b border-slate-200 px-6 py-4">
                 <div className="flex items-center gap-3">
                     <button onClick={() => navigate('/quotations')}
@@ -1035,7 +1037,7 @@ const QuotationForm = () => {
             {/* Tax Preset Creation Modal */}
             {openTaxModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setOpenTaxModal(false)} />
+                    <div className="absolute inset-0 bg-slate-900/60 " onClick={() => setOpenTaxModal(false)} />
                     <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-100 p-6 md:p-8 animate-in zoom-in-95 duration-200">
                         <h3 className="text-lg font-bold text-slate-800 tracking-tight mb-2">Create Tax Preset</h3>
                         <p className="text-xs text-slate-400 mb-6">Create a custom tax percentage rate and label preset to quickly select it later.</p>

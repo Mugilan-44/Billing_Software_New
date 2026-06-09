@@ -6,6 +6,7 @@ import SearchableDropdown from '../components/SearchableDropdown';
 import QuickCustomerModal from '../components/QuickCustomerModal';
 import QuickItemModal from '../components/QuickItemModal';
 import BulkItemModal from '../components/BulkItemModal';
+import UnsavedChangesWarning from '../components/UnsavedChangesWarning';
 import { AuthContext } from '../context/AuthContext';
 
 const InputRow = ({ label, required, children, helper }) => (
@@ -204,16 +205,7 @@ const InvoiceForm = () => {
         }
     }, [customerId, billingAddress, shippingAddress, date, dueDate, notes, termsAndConditions, items, useProductSpecificTax, taxRate, isEdit]);
 
-    useEffect(() => {
-        const handleBeforeUnload = (e) => {
-            if (isFormDirty && !loading) {
-                e.preventDefault();
-                e.returnValue = '';
-            }
-        };
-        window.addEventListener('beforeunload', handleBeforeUnload);
-        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-    }, [isFormDirty, loading]);
+
 
     useEffect(() => {
         fetchCustomers();
@@ -718,7 +710,8 @@ const InvoiceForm = () => {
     };
 
     return (
-        <div className="max-w-6xl mx-auto bg-white shadow-sm rounded-2xl border border-slate-200 mt-6 mb-12 overflow-hidden">
+        <div className="max-w-6xl mx-auto bg-white shadow-sm rounded-lg border border-slate-200 mt-6 mb-12 overflow-hidden">
+            <UnsavedChangesWarning isDirty={isFormDirty && !loading && !error && !showStockWarning} />
             {showStockWarning && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
@@ -1454,7 +1447,7 @@ const InvoiceForm = () => {
             {/* Tax Preset Creation Modal */}
             {openTaxModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setOpenTaxModal(false)} />
+                    <div className="absolute inset-0 bg-slate-900/60 " onClick={() => setOpenTaxModal(false)} />
                     <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-100 p-6 md:p-8 animate-in zoom-in-95 duration-200">
                         <h3 className="text-lg font-bold text-slate-800 tracking-tight mb-2">Create Tax Preset</h3>
                         <p className="text-xs text-slate-400 mb-6">Create a custom tax percentage rate and label preset to quickly select it later.</p>

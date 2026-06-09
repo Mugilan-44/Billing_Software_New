@@ -1052,7 +1052,7 @@ export const TemplateVibrant = ({ invoice, customer, settings, color, printRef }
                         {settings?.gstNumber && <p className="text-white/70 text-sm">GSTIN: {settings.gstNumber}</p>}
                     </div>
                     <div className="text-right">
-                        <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4">
+                        <div className="bg-white/20  rounded-2xl p-4">
                             <p className="text-white/70 text-xs uppercase tracking-widest">Invoice</p>
                             <p className="text-white text-2xl font-black">{invoice.invoiceNumber}</p>
                             <p className="text-white/70 text-sm">{new Date(invoice.date).toLocaleDateString('en-IN')}</p>
@@ -1489,7 +1489,7 @@ const InvoiceViewer = () => {
 
             {/* ── Interactive Send Email Modal ── */}
             {isEmailModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in no-print">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60  p-4 animate-fade-in no-print">
                     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg border border-slate-100 overflow-hidden transform transition-all scale-100 duration-300">
                         {/* Header */}
                         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">

@@ -5,6 +5,7 @@ import { Plus, Trash2, ArrowLeft, Package, Save, Info, User, Calendar } from 'lu
 import SearchableDropdown from '../components/SearchableDropdown';
 import QuickVendorModal from '../components/QuickVendorModal';
 import QuickItemModal from '../components/QuickItemModal';
+import UnsavedChangesWarning from '../components/UnsavedChangesWarning';
 import { AuthContext } from '../context/AuthContext';
 
 const InputRow = ({ label, required, children, helper }) => (
@@ -28,6 +29,7 @@ const PurchaseBillForm = () => {
     const [catalogItems, setCatalogItems] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [isFormDirty, setIsFormDirty] = useState(false);
 
     const [showVendorModal, setShowVendorModal] = useState(false);
     const [showItemModal, setShowItemModal] = useState(false);
@@ -80,18 +82,13 @@ const PurchaseBillForm = () => {
     const [tdsTcsType, setTdsTcsType] = useState('None'); // 'None', 'TDS', 'TCS'
 
     const [taxSystems, setTaxSystems] = useState(() => {
-        const saved = localStorage.getItem('invoice_tax_systems');
-        if (saved) {
-            try { return JSON.parse(saved); } catch (e) {}
-        }
         return [
-            { name: 'Commission or Brokerage', rate: 2, section: 'Section 393(1) Sl1(ii)', status: 'Active' },
-            { name: 'Dividend', rate: 10, section: 'Section 393(1) Sl7', status: 'Active' },
-            { name: 'GST', rate: 18, section: 'Section 393(3) Sl5D(a)', status: 'Active' },
-            { name: 'Other Interest than securities', rate: 10, section: 'Section 393(1) Sl5(iii)', status: 'Active' },
-            { name: 'Payment of contractors for Others', rate: 2, section: 'Section 393(1) Sl6(ii)', status: 'Active' },
-            { name: 'Payment of contractors HUF/Indiv', rate: 1, section: 'Section 393(1) Sl6(i)D(a)', status: 'Active' },
-            { name: 'Technical Fees (2%)', rate: 2, section: 'Section 393(1) Sl6(iii)D(a)', status: 'Active' }
+            { name: 'GST', rate: 0, status: 'Active' },
+            { name: 'GST', rate: 2, status: 'Active' },
+            { name: 'GST', rate: 5, status: 'Active' },
+            { name: 'GST', rate: 12, status: 'Active' },
+            { name: 'GST', rate: 18, status: 'Active' },
+            { name: 'GST', rate: 28, status: 'Active' }
         ];
     });
 
@@ -144,6 +141,15 @@ const PurchaseBillForm = () => {
         setOpenTaxModal(false);
         setPendingItemIndex(-1);
     };
+
+    useEffect(() => {
+        if (!isEdit) {
+            const hasData = vendorId || items.some(i => i.itemId || i.rate > 0 || i.quantity > 1);
+            setIsFormDirty(!!hasData);
+        } else {
+            setIsFormDirty(true);
+        }
+    }, [vendorId, items, isEdit]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -324,19 +330,14 @@ const PurchaseBillForm = () => {
         if (!isTaxed || !useProductSpecificTax) return [];
         const breakdown = {};
         
-        const savedSystems = localStorage.getItem('invoice_tax_systems');
         let taxSystems = [
-            { name: 'Commission or Brokerage', rate: 2 },
-            { name: 'Dividend', rate: 10 },
+            { name: 'GST', rate: 0 },
+            { name: 'GST', rate: 2 },
+            { name: 'GST', rate: 5 },
+            { name: 'GST', rate: 12 },
             { name: 'GST', rate: 18 },
-            { name: 'Other Interest than securities', rate: 10 },
-            { name: 'Payment of contractors for Others', rate: 2 },
-            { name: 'Payment of contractors HUF/Indiv', rate: 1 },
-            { name: 'Technical Fees (2%)', rate: 2 }
+            { name: 'GST', rate: 28 },
         ];
-        if (savedSystems) {
-            try { taxSystems = JSON.parse(savedSystems); } catch (e) {}
-        }
 
         items.forEach(item => {
             if (!item.itemId) return;
@@ -454,6 +455,7 @@ const PurchaseBillForm = () => {
 
     return (
         <div className="max-w-6xl mx-auto bg-white shadow-sm rounded-lg border border-slate-200 mt-6 mb-12 overflow-hidden">
+            <UnsavedChangesWarning isDirty={isFormDirty && !loading && !error} />
             {/* Header */}
             <div className="flex items-center justify-between bg-slate-50/50 border-b border-slate-200 px-6 py-4">
                 <div className="flex items-center gap-3">
@@ -632,106 +634,7 @@ const PurchaseBillForm = () => {
                         </div>
                     </InputRow>
 
-                    {taxSystemMode === 'OVERALL' && (
-                        <InputRow label="Tax Setting" helper="Choose whether to record this bill as Tax or Tax Free">
-                            <div className="flex items-center gap-4">
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setIsTaxed(true);
-                                        if (taxType === 'None') setTaxType('GST');
-                                    }}
-                                    className={`px-4 py-2 text-xs font-semibold rounded-xl border transition-all duration-200 ${isTaxed ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}`}
-                                >
-                                    Tax
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setIsTaxed(false);
-                                    }}
-                                    className={`px-4 py-2 text-xs font-semibold rounded-xl border transition-all duration-200 ${!isTaxed ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}`}
-                                >
-                                    Tax Free
-                                </button>
-                            </div>
-                        </InputRow>
-                    )}
 
-                    {isTaxed && (
-                        <>
-                            <InputRow label="Tax Application Mode" helper="Apply a single tax rate globally or use product-specific tax rates">
-                                <div className="flex gap-4">
-                                    <button
-                                        type="button"
-                                        onClick={() => setUseProductSpecificTax(true)}
-                                        className={`px-4 py-2 text-xs font-semibold rounded-xl border transition-all duration-200 ${useProductSpecificTax ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}`}
-                                    >
-                                        Product Specific
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setUseProductSpecificTax(false)}
-                                        className={`px-4 py-2 text-xs font-semibold rounded-xl border transition-all duration-200 ${!useProductSpecificTax ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}`}
-                                    >
-                                        Global Rate
-                                    </button>
-                                </div>
-                            </InputRow>
-
-                            {!useProductSpecificTax && (
-                                <InputRow label="Tax System & Rate" helper="Select the tax system and global percentage rate">
-                                    <div className="flex items-center gap-4 max-w-md">
-                                        <select
-                                            className="input-field max-w-[200px]"
-                                            value={taxSystems.some(ts => ts.name === taxType && ts.rate === Number(taxRate)) ? `${taxType}|${taxRate}` : ''}
-                                            onChange={(e) => {
-                                                if (e.target.value === 'ADD_NEW') {
-                                                    setPendingItemIndex(-1);
-                                                    setOpenTaxModal(true);
-                                                } else if (e.target.value) {
-                                                    const [name, rate] = e.target.value.split('|');
-                                                    setTaxType(name);
-                                                    setTaxRate(Number(rate));
-                                                }
-                                            }}
-                                        >
-                                            <option value="">Select Tax System</option>
-                                            {taxSystems.filter(ts => ts.status === 'Active').map((ts, sIdx) => (
-                                                <option key={sIdx} value={`${ts.name}|${ts.rate}`}>
-                                                    {ts.name} ({ts.rate}%)
-                                                </option>
-                                            ))}
-                                            <option value="ADD_NEW" className="text-blue-600 font-semibold">+ Add New Tax...</option>
-                                        </select>
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setPendingItemIndex(-1);
-                                                setOpenTaxModal(true);
-                                            }}
-                                            className="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold text-xs rounded-xl border border-blue-200 whitespace-nowrap animate-in fade-in"
-                                        >
-                                            + Add Preset
-                                        </button>
-                                        <div className="relative flex-1 max-w-[120px]">
-                                            <input
-                                                type="number"
-                                                min="0" max="100" step="0.1"
-                                                className="input-field pr-8"
-                                                value={taxRate}
-                                                onChange={(e) => setTaxRate(e.target.value)}
-                                                placeholder="Rate"
-                                            />
-                                            <span className="absolute right-3 top-2.5 text-slate-400 text-sm font-semibold">%</span>
-                                        </div>
-                                    </div>
-                                </InputRow>
-                            )}
-
-
-                        </>
-                    )}
                 </div>
                 {/* Purchased Items Table */}
                 <div className="border border-slate-200 rounded-lg bg-white mt-8 mx-8">
@@ -1042,7 +945,7 @@ const PurchaseBillForm = () => {
             {/* Tax Preset Creation Modal */}
             {openTaxModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setOpenTaxModal(false)} />
+                    <div className="absolute inset-0 bg-slate-900/60 " onClick={() => setOpenTaxModal(false)} />
                     <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-100 p-6 md:p-8 animate-in zoom-in-95 duration-200">
                         <h3 className="text-lg font-bold text-slate-800 tracking-tight mb-2">Create Tax Preset</h3>
                         <p className="text-xs text-slate-400 mb-6">Create a custom tax percentage rate and label preset to quickly select it later.</p>
