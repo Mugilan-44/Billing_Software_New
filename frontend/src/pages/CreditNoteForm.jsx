@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, FileMinus, Save, User, Calendar, FileText, Info, Plus, Trash2 } from 'lucide-react';
 import SearchableDropdown from '../components/SearchableDropdown';
 import { AuthContext } from '../context/AuthContext';
+import UnsavedChangesWarning from '../components/UnsavedChangesWarning';
 
 const InputRow = ({ label, required, children, helper, error }) => (
     <div className="flex items-start py-3 border-b border-slate-100 last:border-0 font-sans">
@@ -28,6 +29,7 @@ const CreditNoteForm = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [companySettings, setCompanySettings] = useState(null);
+    const [isFormDirty, setIsFormDirty] = useState(false);
 
     // Form state
     const [customerId, setCustomerId] = useState('');
@@ -64,6 +66,11 @@ const CreditNoteForm = () => {
     useEffect(() => {
         fetchInitialData();
     }, []);
+
+    useEffect(() => {
+        const hasData = customerId || invoiceId || reason || reference || subject;
+        setIsFormDirty(!!hasData);
+    }, [customerId, invoiceId, reason, reference, subject]);
 
     useEffect(() => {
         if (taxSystemMode && taxSystemMode !== 'OVERALL') {
@@ -274,6 +281,7 @@ const CreditNoteForm = () => {
 
     return (
         <div className="max-w-5xl mx-auto bg-white shadow-sm rounded-lg border border-slate-200 mt-6 mb-12 overflow-hidden">
+            <UnsavedChangesWarning isDirty={isFormDirty && !loading && !error} />
             {/* Header */}
             <div className="flex items-center justify-between bg-red-50/30 border-b border-red-100 px-6 py-4">
                 <div className="flex items-center gap-3">

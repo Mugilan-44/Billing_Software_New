@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from '../utils/api';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Save, CreditCard, Trash2 } from 'lucide-react';
+import UnsavedChangesWarning from '../components/UnsavedChangesWarning';
 
 const InputRow = ({ label, required, children }) => (
     <div className="flex items-start py-3 border-b border-slate-100 last:border-0">
@@ -37,6 +38,7 @@ const PaymentForm = () => {
     const [invoices, setInvoices] = useState([]);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [isFormDirty, setIsFormDirty] = useState(false);
 
     const [form, setForm] = useState({
         customerId: '',
@@ -61,6 +63,15 @@ const PaymentForm = () => {
             }));
         }
     }, [id, queryCustomerId, queryInvoiceId]);
+
+    useEffect(() => {
+        if (!isEdit) {
+            const hasData = form.customerId || form.amount || form.referenceNumber || form.notes;
+            setIsFormDirty(!!hasData);
+        } else {
+            setIsFormDirty(true);
+        }
+    }, [form, isEdit]);
 
     const fetchInitialData = async () => {
         try {
@@ -158,6 +169,7 @@ const PaymentForm = () => {
 
     return (
         <div className="max-w-4xl mx-auto bg-white shadow-sm rounded-lg border border-slate-200 mt-6 mb-12 overflow-hidden">
+            <UnsavedChangesWarning isDirty={isFormDirty && !loading && !error} />
             {/* Header */}
             <div className="flex items-center justify-between bg-slate-50/50 border-b border-slate-200 px-6 py-4">
                 <div className="flex items-center gap-3">
