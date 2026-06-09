@@ -12,23 +12,14 @@ const TAX_PRESETS = {
 export default function QuickItemModal({ isOpen, onClose, onSuccess }) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [activeTab, setActiveTab] = useState('general');
-
-    // General Fields
     const [name, setName] = useState('');
     const [sku, setSku] = useState('');
     const [type, setType] = useState('Goods');
     const [unit, setUnit] = useState('pcs');
-    const [hsnSacCode, setHsnSacCode] = useState('');
-    const [taxType, setTaxType] = useState('GST');
-    const [taxRate, setTaxRate] = useState(18);
     const [description, setDescription] = useState('');
-
-    // Pricing & Inventory
     const [sellingPrice, setSellingPrice] = useState('');
-    const [purchasePrice, setPurchasePrice] = useState('');
-    const [availableStock, setAvailableStock] = useState(0);
-    const [lowStockAlert, setLowStockAlert] = useState(5);
+    const [availableStock, setAvailableStock] = useState('');
+    const [lowStockAlert, setLowStockAlert] = useState('');
 
     if (!isOpen) return null;
 
@@ -51,19 +42,14 @@ export default function QuickItemModal({ isOpen, onClose, onSuccess }) {
         try {
             const payload = {
                 name,
-                sku: sku.trim() || undefined, // send blank to let backend generate SKU
+                sku: sku.trim() || undefined,
                 type,
                 unit,
-                hsnSacCode,
-                sellingPrice: parsedSellingPrice,
-                purchasePrice: Number(purchasePrice) || 0,
-                taxType,
-                taxRate: Number(taxRate) || 0,
-                gstPercentage: Number(taxRate) || 0,
-                openingStock: Number(availableStock) || 0,
+                description,
+                sellingPrice: Number(sellingPrice) || 0,
+                stockQuantity: Number(availableStock) || 0,
                 availableStock: Number(availableStock) || 0,
-                lowStockAlert: Number(lowStockAlert) || 5,
-                description
+                lowStockAlert: Number(lowStockAlert) || 0
             };
             const res = await axios.post('/api/items', payload);
             onSuccess(res.data.data);
@@ -106,203 +92,115 @@ export default function QuickItemModal({ isOpen, onClose, onSuccess }) {
                 <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
                     <div className="flex-1 overflow-y-auto p-6 space-y-5">
                         
-                        {/* Tabs Navigation */}
-                        <div className="border-b border-slate-200 dark:border-slate-700">
-                            <div className="flex gap-4">
-                                <button
-                                    type="button"
-                                    className={`pb-2 px-1 text-xs font-bold transition-all border-b-2 ${activeTab === 'general' ? 'border-blue-500 text-blue-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}
-                                    onClick={() => setActiveTab('general')}
-                                >
-                                    General Details
-                                </button>
-                                <button
-                                    type="button"
-                                    className={`pb-2 px-1 text-xs font-bold transition-all border-b-2 ${activeTab === 'pricing' ? 'border-blue-500 text-blue-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}
-                                    onClick={() => setActiveTab('pricing')}
-                                >
-                                    Pricing & Inventory
-                                </button>
-                            </div>
-                        </div>
+                        {/* Form Fields merged */}
+                        <div className="space-y-6">
+                            <div className="space-y-4">
+                                <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-2 border-b border-slate-100 dark:border-slate-800 pb-2">General Details</h4>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">Item Name *</label>
+                                    <input
+                                        type="text"
+                                        className="block w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none"
+                                        value={name}
+                                        onChange={e => setName(e.target.value)}
+                                        placeholder="e.g. Spare Parts, Consultation Fee"
+                                        required
+                                    />
+                                </div>
 
-                        {/* Tab Content */}
-                        <div className="space-y-4">
-                            {activeTab === 'general' && (
-                                <div className="space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">Item Name *</label>
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">Item Code (SKU)</label>
                                         <input
                                             type="text"
+                                            className="block w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none font-mono"
+                                            value={sku}
+                                            onChange={e => setSku(e.target.value)}
+                                            placeholder="Auto-generated if empty"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">Item Type</label>
+                                        <select
                                             className="block w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none"
-                                            value={name}
-                                            onChange={e => setName(e.target.value)}
-                                            placeholder="e.g. Spare Parts, Consultation Fee"
+                                            value={type}
+                                            onChange={e => setType(e.target.value)}
+                                        >
+                                            <option value="Goods">Goods</option>
+                                            <option value="Service">Service</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">Unit</label>
+                                        <select
+                                            className="block w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none"
+                                            value={unit}
+                                            onChange={e => setUnit(e.target.value)}
+                                        >
+                                            <option value="pcs">Pieces (pcs)</option>
+                                            <option value="kg">Kilograms (kg)</option>
+                                            <option value="mtr">Meters (mtr)</option>
+                                            <option value="box">Box</option>
+                                            <option value="nos">Numbers (nos)</option>
+                                            <option value="hrs">Hours (hrs)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">Description</label>
+                                    <textarea
+                                        className="block w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none resize-none h-16"
+                                        value={description}
+                                        onChange={e => setDescription(e.target.value)}
+                                        placeholder="Specifications, size, etc."
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-4 pt-2">
+                                <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-2 border-b border-slate-100 dark:border-slate-800 pb-2">Pricing & Inventory</h4>
+                                <div className="grid grid-cols-1 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">Selling Price (₹) *</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            className="block w-full max-w-[220px] px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none font-bold"
+                                            value={sellingPrice}
+                                            onChange={e => setSellingPrice(e.target.value)}
+                                            placeholder="0.00"
                                             required
                                         />
                                     </div>
+                                </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">Item Code (SKU)</label>
-                                            <input
-                                                type="text"
-                                                className="block w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none font-mono"
-                                                value={sku}
-                                                onChange={e => setSku(e.target.value)}
-                                                placeholder="Auto-generated if empty"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">Item Type</label>
-                                            <select
-                                                className="block w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none"
-                                                value={type}
-                                                onChange={e => setType(e.target.value)}
-                                            >
-                                                <option value="Goods">Goods</option>
-                                                <option value="Service">Service</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">Unit</label>
-                                            <select
-                                                className="block w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none"
-                                                value={unit}
-                                                onChange={e => setUnit(e.target.value)}
-                                            >
-                                                <option value="pcs">Pieces (pcs)</option>
-                                                <option value="kg">Kilograms (kg)</option>
-                                                <option value="mtr">Meters (mtr)</option>
-                                                <option value="box">Box</option>
-                                                <option value="nos">Numbers (nos)</option>
-                                                <option value="hrs">Hours (hrs)</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">HSN / SAC Code</label>
-                                            <input
-                                                type="text"
-                                                className="block w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none uppercase"
-                                                value={hsnSacCode}
-                                                onChange={e => setHsnSacCode(e.target.value)}
-                                                placeholder="HSN / SAC Code"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">Tax System</label>
-                                            <select
-                                                className="block w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none"
-                                                value={taxType}
-                                                onChange={e => {
-                                                    const newType = e.target.value;
-                                                    setTaxType(newType);
-                                                    setTaxRate(TAX_PRESETS[newType]?.[0] || 0);
-                                                }}
-                                            >
-                                                <option value="GST">GST (Goods & Services Tax)</option>
-                                                <option value="VAT">VAT (Value Added Tax)</option>
-                                                <option value="Sales Tax">Sales Tax</option>
-                                                <option value="Custom">Custom Tax System</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">Tax Rate (%)</label>
-                                            {taxType !== 'Custom' ? (
-                                                <select
-                                                    className="block w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none"
-                                                    value={taxRate}
-                                                    onChange={e => setTaxRate(Number(e.target.value))}
-                                                >
-                                                    {TAX_PRESETS[taxType]?.map(rate => (
-                                                        <option key={rate} value={rate}>{rate}%</option>
-                                                    ))}
-                                                </select>
-                                            ) : (
-                                                <input
-                                                    type="number"
-                                                    step="0.01"
-                                                    min="0"
-                                                    max="100"
-                                                    className="block w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none"
-                                                    value={taxRate}
-                                                    onChange={e => setTaxRate(Number(e.target.value))}
-                                                    placeholder="0.00%"
-                                                />
-                                            )}
-                                        </div>
-                                    </div>
-
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">Description</label>
-                                        <textarea
-                                            className="block w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none resize-none h-16"
-                                            value={description}
-                                            onChange={e => setDescription(e.target.value)}
-                                            placeholder="Specifications, size, etc."
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">Available Stock</label>
+                                        <input
+                                            type="number"
+                                            className="block w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none"
+                                            value={availableStock}
+                                            onChange={e => setAvailableStock(Number(e.target.value) || '')}
+                                            min={0}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">Low Stock Alert</label>
+                                        <input
+                                            type="number"
+                                            className="block w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none text-red-600 font-bold"
+                                            value={lowStockAlert}
+                                            onChange={e => setLowStockAlert(Number(e.target.value) || '')}
+                                            min={0}
                                         />
                                     </div>
                                 </div>
-                            )}
-
-                            {activeTab === 'pricing' && (
-                                <div className="space-y-4">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">Selling Price (₹) *</label>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                className="block w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none font-bold"
-                                                value={sellingPrice}
-                                                onChange={e => setSellingPrice(e.target.value)}
-                                                placeholder="0.00"
-                                                required
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">Purchase Price (₹)</label>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                className="block w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none"
-                                                value={purchasePrice}
-                                                onChange={e => setPurchasePrice(e.target.value)}
-                                                placeholder="0.00"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">Available Stock</label>
-                                            <input
-                                                type="number"
-                                                className="block w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none"
-                                                value={availableStock}
-                                                onChange={e => setAvailableStock(Number(e.target.value))}
-                                                min={0}
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">Low Stock Alert</label>
-                                            <input
-                                                type="number"
-                                                className="block w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none text-red-600 font-bold"
-                                                value={lowStockAlert}
-                                                onChange={e => setLowStockAlert(Number(e.target.value))}
-                                                min={0}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
+                            </div>
                         </div>
 
                     </div>
