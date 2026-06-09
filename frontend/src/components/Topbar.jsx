@@ -30,33 +30,6 @@ const Topbar = () => {
         }, 1200);
     };
 
-    const animationConfigs = {
-        'Combined': {
-            bg: 'bg-blue-50/50',
-            borderColor: 'border-blue-200/60',
-            glowColor: 'rgba(37,99,235,0.4)',
-            title: 'Entering Combined Mode',
-            subtitle: 'Activating unified tax & standard invoicing view.',
-            icon: <Sparkles className="w-8 h-8 text-blue-600 animate-pulse" />
-        },
-        'Tax': {
-            bg: 'bg-rose-50/50',
-            borderColor: 'border-rose-200/60',
-            glowColor: 'rgba(220,38,38,0.4)',
-            title: 'Entering Tax Mode',
-            subtitle: 'Activating itemized GST and tax calculations view.',
-            icon: <Percent className="w-8 h-8 text-rose-600" />
-        },
-        'Tax Free': {
-            bg: 'bg-emerald-50/50',
-            borderColor: 'border-emerald-200/60',
-            glowColor: 'rgba(16,163,74,0.4)',
-            title: 'Entering Tax-Free Mode',
-            subtitle: 'Hiding tax fields for a clean, tax-exempt invoice view.',
-            icon: <ShieldCheck className="w-8 h-8 text-emerald-600" />
-        }
-    };
-
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState({ customers: [], invoices: [] });
     const [searchLoading, setSearchLoading] = useState(false);
@@ -370,63 +343,23 @@ const Topbar = () => {
             </div>
 
             {/* Tax Mode transition overlay animation */}
-            {animationMode && (() => {
-                const config = animationConfigs[animationMode];
-                return (
-                    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/45 animate-backdrop-in">
-                        <div 
-                            className="bg-white rounded-3xl border p-8 max-w-sm w-full mx-4 flex flex-col items-center text-center shadow-2xl animate-card-in"
-                            style={{
-                                borderColor: config.borderColor,
-                                boxShadow: `0 20px 40px -15px rgba(0,0,0,0.1), 0 0 40px ${config.glowColor}`
-                            }}
-                        >
-                            <div className={`p-4 rounded-2xl ${config.bg} mb-4 border border-slate-100/50 flex items-center justify-center`}>
-                                {config.icon}
-                            </div>
-                            
-                            <h3 className="text-lg font-black text-slate-900 tracking-tight">
-                                {config.title}
-                            </h3>
-                            <p className="text-xs text-slate-450 font-medium mt-2 leading-relaxed">
-                                {config.subtitle}
-                            </p>
-
-                            <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden mt-6">
-                                <div 
-                                    className="h-full bg-current rounded-full"
-                                    style={{
-                                        color: `var(--primary-600)`,
-                                        width: '100%',
-                                        animation: 'progressFill 1.2s linear forwards'
-                                    }}
-                                />
-                            </div>
-                        </div>
-                        <style>{`
-                            @keyframes backdropFadeIn {
-                                from { opacity: 0; backdrop-filter: blur(0px); }
-                                to { opacity: 1; backdrop-filter: blur(12px); }
-                            }
-                            @keyframes cardSpringIn {
-                                0% { transform: scale(0.9) translateY(10px); opacity: 0; }
-                                70% { transform: scale(1.03) translateY(-2px); opacity: 1; }
-                                100% { transform: scale(1) translateY(0); opacity: 1; }
-                            }
-                            @keyframes progressFill {
-                                from { width: 0%; }
-                                to { width: 100%; }
-                            }
-                            .animate-backdrop-in {
-                                animation: backdropFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-                            }
-                            .animate-card-in {
-                                animation: cardSpringIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-                            }
-                        `}</style>
+            {animationMode && (
+                <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[9999] animate-toast-in pointer-events-none">
+                    <div className="bg-slate-900/95 backdrop-blur-md text-white px-5 py-3.5 rounded-full flex items-center gap-3 shadow-2xl border border-white/10">
+                        <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin shrink-0" />
+                        <span className="text-sm font-medium tracking-wide">Applying {animationMode} view...</span>
                     </div>
-                );
-            })()}
+                    <style>{`
+                        @keyframes toastSpringIn {
+                            0% { transform: translateY(-20px); opacity: 0; }
+                            100% { transform: translateY(0); opacity: 1; }
+                        }
+                        .animate-toast-in {
+                            animation: toastSpringIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                        }
+                    `}</style>
+                </div>
+            )}
         </header>
     );
 };
