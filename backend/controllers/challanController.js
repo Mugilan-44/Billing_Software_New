@@ -71,12 +71,7 @@ export const createChallan = async (req, res) => {
         for (const i of req.body.items || []) {
             const dbItem = await findDocument(Item, i.itemId, req.user);
             if (dbItem && dbItem.type === 'Goods') {
-                if (!req.body.allowNegativeStock && dbItem.stockQuantity < i.quantity) {
-                    return res.status(400).json({
-                        success: false,
-                        message: `Insufficient stock for item '${dbItem.name}'. Available: ${dbItem.stockQuantity}, Requested: ${i.quantity}`,
-                    });
-                }
+                // Allow negative stock natively
                 dbItem.stockQuantity -= i.quantity;
                 await dbItem.save();
             }
@@ -160,23 +155,7 @@ export const updateChallan = async (req, res) => {
         for (const i of newItems) {
             const dbItem = await findDocument(Item, i.itemId, req.user);
             if (dbItem && dbItem.type === 'Goods') {
-                if (!req.body.allowNegativeStock && dbItem.stockQuantity < i.quantity) {
-                    // Rollback previously restored items (re-deduct them)
-                    for (const prev of challan.items) {
-                        const prevDbItem = await findDocument(Item, prev.itemId, req.user);
-                        if (prevDbItem && prevDbItem.type === 'Goods') {
-                            prevDbItem.stockQuantity -= prev.quantity;
-                            if (prevDbItem.availableStock !== undefined) {
-                                prevDbItem.availableStock -= prev.quantity;
-                            }
-                            await prevDbItem.save();
-                        }
-                    }
-                    return res.status(400).json({
-                        success: false,
-                        message: `Insufficient stock for item '${dbItem.name}'. Available: ${dbItem.stockQuantity}, Requested: ${i.quantity}`,
-                    });
-                }
+                // Allow negative stock natively
                 dbItem.stockQuantity -= i.quantity;
                 if (dbItem.availableStock !== undefined) {
                     dbItem.availableStock -= i.quantity;

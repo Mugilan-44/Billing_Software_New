@@ -199,9 +199,7 @@ export const createInvoice = async (req, res) => {
           const stock = await Item.findById(item.itemId).session(session);
           if (stock && (stock.trackStock !== false) && stock.type !== 'Service') {
             const available = stock.availableStock ?? stock.stockQuantity ?? 0;
-            if (available < item.quantity && !req.body.allowNegativeStock) {
-              throw new Error(`Insufficient stock for: ${stock.name} (available: ${available})`);
-            }
+            // Allow negative stock natively
             const newStock = roundTo(available - item.quantity);
             stock.availableStock = newStock;
             stock.stockQuantity  = newStock;
@@ -316,11 +314,7 @@ export const createInvoice = async (req, res) => {
       // FIX C1: Negative stock guard before deducting
       if (dbItem.type === 'Goods' && !challanId) {
         const available = dbItem.availableStock ?? dbItem.stockQuantity ?? 0;
-        if (available < i.quantity && !req.body.allowNegativeStock) {
-          throw new Error(
-            `Insufficient stock for "${dbItem.name}". Available: ${available}, Requested: ${i.quantity}`
-          );
-        }
+        // Allow negative stock natively
         const prevStock = available;
         const newStock  = roundTo(prevStock - i.quantity);
         dbItem.availableStock = newStock;
@@ -631,9 +625,7 @@ export const updateInvoice = async (req, res) => {
         const stock = await Item.findById(item.itemId).session(session);
         if (stock && (stock.trackStock !== false) && stock.type !== 'Service') {
           const available = stock.availableStock ?? stock.stockQuantity ?? 0;
-          if (available < item.quantity && !req.body.allowNegativeStock) {
-            throw new Error(`Insufficient stock for "${stock.name}"`);
-          }
+          // Allow negative stock natively
           const newStock = Math.round((available - item.quantity) * 100) / 100;
           stock.availableStock = newStock;
           stock.stockQuantity = newStock;
