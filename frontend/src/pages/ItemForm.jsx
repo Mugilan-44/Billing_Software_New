@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from '../utils/api';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save, Package } from 'lucide-react';
+import UnsavedChangesWarning from '../components/UnsavedChangesWarning';
 
 const InputRow = ({ label, required, children }) => (
     <div className="flex items-start py-3 border-b border-slate-100 last:border-0">
@@ -19,6 +20,7 @@ const ItemForm = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [isFormDirty, setIsFormDirty] = useState(false);
 
     const [form, setForm] = useState({
         name: '',
@@ -43,6 +45,15 @@ const ItemForm = () => {
             fetchItem();
         }
     }, [id]);
+
+    useEffect(() => {
+        if (!isEdit) {
+            const hasData = form.name || form.sku || form.sellingPrice;
+            setIsFormDirty(!!hasData);
+        } else {
+            setIsFormDirty(true);
+        }
+    }, [form, isEdit]);
 
     const fetchItem = async () => {
         try {
@@ -106,6 +117,7 @@ const ItemForm = () => {
 
     return (
         <div className="max-w-5xl mx-auto bg-white shadow-sm rounded-lg border border-slate-200 mt-6 mb-12 overflow-hidden">
+            <UnsavedChangesWarning isDirty={isFormDirty && !loading && !error} />
             {/* Header */}
             <div className="flex items-center justify-between bg-slate-50/50 border-b border-slate-200 px-6 py-4">
                 <div className="flex items-center gap-3">

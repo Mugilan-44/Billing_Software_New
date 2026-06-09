@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from '../utils/api';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import UnsavedChangesWarning from '../components/UnsavedChangesWarning';
 
 const INDIAN_STATES = [
     'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat',
@@ -29,6 +30,7 @@ const VendorForm = () => {
     const [loading, setLoading] = useState(false);
     const [saveError, setSaveError] = useState('');
     const [saveSuccess, setSaveSuccess] = useState('');
+    const [isFormDirty, setIsFormDirty] = useState(false);
 
     const [form, setForm] = useState({
         companyName: '',
@@ -51,6 +53,15 @@ const VendorForm = () => {
             fetchVendor();
         }
     }, [id]);
+
+    useEffect(() => {
+        if (!isEdit) {
+            const hasData = form.companyName || form.email || form.phone;
+            setIsFormDirty(!!hasData);
+        } else {
+            setIsFormDirty(true);
+        }
+    }, [form, isEdit]);
 
     const fetchVendor = async () => {
         try {
@@ -118,6 +129,7 @@ const VendorForm = () => {
 
     return (
         <div className="max-w-5xl mx-auto bg-white shadow-sm rounded-lg border border-slate-200 mt-6 mb-12 overflow-hidden">
+            <UnsavedChangesWarning isDirty={isFormDirty && !loading && !saveError} />
             {/* Header */}
             <div className="flex items-center justify-between bg-slate-50/50 border-b border-slate-200 px-6 py-4">
                 <div className="flex items-center gap-3">
