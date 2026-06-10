@@ -180,11 +180,11 @@ const CreditNoteViewer = () => {
         <div className="max-w-6xl mx-auto pb-20 px-4">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center py-6 gap-4 no-print">
                 <div className="flex items-center gap-4">
-                    <button onClick={() => navigate('/credit-notes')} className="group p-3 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-red-600 hover:border-red-200 transition-all shadow-sm">
+                    <button onClick={() => navigate('/credit-notes')} className="group p-3 bg-white border border-slate-200 rounded-md text-slate-400 hover:text-red-600 hover:border-red-200 transition-all shadow-sm">
                         <ArrowLeft size={20} />
                     </button>
                     <div>
-                        <div className="flex items-center gap-3 mb-1">
+                        <div className="flex flex-wrap items-center gap-3 mb-1">
                             <h1 className="text-2xl font-black text-slate-900">#{cn.cnNumber}</h1>
                             <span className={`text-[10px] px-2.5 py-1 rounded-full font-black tracking-widest uppercase ${
                                 cn.status === 'Open' ? 'bg-blue-500 text-white' :
@@ -194,31 +194,32 @@ const CreditNoteViewer = () => {
                             }`}>
                                 {cn.status || 'Open'}
                             </span>
+                            
+                            <div className="flex items-center gap-2 ml-2">
+                                <button
+                                    onClick={handleDownloadPDF}
+                                    disabled={downloading}
+                                    className="flex items-center gap-1 px-2 py-1 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 rounded-md font-semibold text-[11px] shadow-sm transition-all disabled:opacity-70"
+                                >
+                                    {downloading
+                                        ? <><div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" /> Downloading...</>
+                                        : <><Download size={12} /> Download</>
+                                    }
+                                </button>
+                            </div>
                         </div>
                         <p className="text-slate-500 text-sm">{customer?.companyName || customer?.name}</p>
                     </div>
 
-                    <div className="flex items-center gap-2 ml-4">
-                        <button
-                            onClick={handleDownloadPDF}
-                            disabled={downloading}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 rounded-lg font-semibold text-xs shadow-sm transition-all disabled:opacity-70"
-                        >
-                            {downloading
-                                ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Downloading...</>
-                                : <><Download size={14} /> Download</>
-                            }
-                        </button>
-                    </div>
                 </div>
 
                 <div className="flex items-center gap-2">
                     {cn.status === 'Open' && (
                         <>
-                            <button onClick={() => handleUpdateStatus('Refunded')} className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold text-xs shadow-sm transition-all" title="Record Refund">
+                            <button onClick={() => handleUpdateStatus('Refunded')} className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md font-semibold text-xs shadow-sm transition-all" title="Record Refund">
                                 <Check size={14} /> Refund
                             </button>
-                            <button onClick={() => handleUpdateStatus('Applied')} className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold text-xs shadow-sm transition-all" title="Apply to Invoice">
+                            <button onClick={() => handleUpdateStatus('Applied')} className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-md font-semibold text-xs shadow-sm transition-all" title="Apply to Invoice">
                                 <Check size={14} /> Apply Credits
                             </button>
                         </>
@@ -240,14 +241,14 @@ const CreditNoteViewer = () => {
                     <div className="relative">
                         <button
                             onClick={() => setShowColors(v => !v)}
-                            className="p-1.5 bg-white border border-slate-200 rounded-lg shadow-sm hover:border-slate-300 transition-all flex items-center gap-1.5"
+                            className="p-1.5 bg-white border border-slate-200 rounded-md shadow-sm hover:border-slate-300 transition-all flex items-center gap-1.5"
                             title="Change Color Theme"
                         >
                             <div className="w-3.5 h-3.5 rounded-full border border-white shadow-sm" style={{ backgroundColor: accentColor }}></div>
                             <Palette size={14} className="text-slate-500" />
                         </button>
                         {showColors && (
-                            <div className="absolute left-0 top-9 bg-white border border-slate-200 rounded-lg shadow-xl p-2.5 z-50 flex gap-1.5">
+                            <div className="absolute left-0 top-9 bg-white border border-slate-200 rounded-md shadow-xl p-2.5 z-50 flex gap-1.5">
                                 {COLOR_THEMES.map(t => (
                                     <button
                                         key={t.value}
@@ -265,7 +266,7 @@ const CreditNoteViewer = () => {
 
             {/* ── Credit Note Preview (Beautiful template) ── */}
             <div className="flex justify-center">
-                <div className="w-full max-w-4xl shadow-2xl bg-white p-10 rounded-lg border border-slate-200 font-sans" ref={printRef}>
+                <div className="w-full max-w-4xl shadow-2xl bg-white p-10 rounded-md border border-slate-200 font-sans" ref={printRef}>
                     <div className="flex justify-between items-start pb-8 mb-8" style={{ borderBottom: `3px solid ${accentColor}` }}>
                         <div>
                             {settings?.logoUrl
@@ -344,7 +345,7 @@ const CreditNoteViewer = () => {
 
                     <div className="grid grid-cols-2 gap-12">
                         <div>
-                            <div className="bg-red-50 p-4 rounded-xl border border-red-100 flex items-start gap-3">
+                            <div className="bg-red-50 p-4 rounded-md border border-red-100 flex items-start gap-3">
                                 <AlertTriangle size={18} className="text-red-500 mt-0.5 shrink-0" />
                                 <div>
                                     <h4 className="text-xs font-bold text-red-800 uppercase tracking-wider mb-1">Reason for Credit</h4>
@@ -402,7 +403,7 @@ const CreditNoteViewer = () => {
                         {cn.includeSignature && (
                             <div className="pt-8 border-t border-slate-100 flex justify-end">
                                 <div className="text-center">
-                                    <div className="border border-slate-200 rounded-lg p-2 w-48 h-20 flex items-center justify-center bg-slate-50 mb-2">
+                                    <div className="border border-slate-200 rounded-md p-2 w-48 h-20 flex items-center justify-center bg-slate-50 mb-2">
                                         {settings?.signature ? (
                                             <img src={getImageUrl(settings.signature)} alt="Signature" className="max-h-full max-w-full object-contain" />
                                         ) : (
@@ -443,7 +444,7 @@ const CreditNoteViewer = () => {
                                     type="email"
                                     value={emailTo}
                                     onChange={e => setEmailTo(e.target.value)}
-                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:bg-white focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all outline-none"
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-md text-slate-800 text-sm focus:bg-white focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all outline-none"
                                     placeholder="customer@example.com"
                                     required
                                 />
@@ -455,7 +456,7 @@ const CreditNoteViewer = () => {
                                     type="text"
                                     value={emailSubject}
                                     onChange={e => setEmailSubject(e.target.value)}
-                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:bg-white focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all outline-none"
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-md text-slate-800 text-sm focus:bg-white focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all outline-none"
                                     required
                                 />
                             </div>
@@ -466,7 +467,7 @@ const CreditNoteViewer = () => {
                                     value={emailMessage}
                                     onChange={e => setEmailMessage(e.target.value)}
                                     rows={5}
-                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:bg-white focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all outline-none resize-none"
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-md text-slate-800 text-sm focus:bg-white focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all outline-none resize-none"
                                     required
                                 />
                             </div>
@@ -475,14 +476,14 @@ const CreditNoteViewer = () => {
                         <div className="p-6 bg-slate-50/50 border-t border-slate-100 flex justify-end gap-3">
                             <button
                                 onClick={() => setIsEmailModalOpen(false)}
-                                className="px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 font-bold text-sm hover:bg-slate-50 hover:border-slate-300 transition-all"
+                                className="px-5 py-2.5 bg-white border border-slate-200 rounded-md text-slate-600 font-bold text-sm hover:bg-slate-50 hover:border-slate-300 transition-all"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleSendEmail}
                                 disabled={sendingEmail}
-                                className="px-5 py-2.5 text-white bg-slate-800 rounded-xl font-bold text-sm shadow-md transition-all hover:bg-slate-900 disabled:opacity-75 flex items-center gap-2"
+                                className="px-5 py-2.5 text-white bg-slate-800 rounded-md font-bold text-sm shadow-md transition-all hover:bg-slate-900 disabled:opacity-75 flex items-center gap-2"
                             >
                                 {sendingEmail ? (
                                     <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Sending...</>

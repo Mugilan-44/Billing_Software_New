@@ -135,27 +135,27 @@ const ChallanViewer = () => {
         <div className="max-w-6xl mx-auto pb-20 px-4">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center py-8 gap-6 no-print">
                 <div className="flex items-center gap-5">
-                    <button onClick={() => navigate('/challans')} className="group p-3 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm">
+                    <button onClick={() => navigate('/challans')} className="group p-3 bg-white border border-slate-200 rounded-md text-slate-400 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm">
                         <ArrowLeft size={20} />
                     </button>
                     <div>
-                        <div className="flex items-center gap-3 mb-1">
+                        <div className="flex flex-wrap items-center gap-3 mb-1">
                             <h1 className="text-3xl font-black text-slate-900 tracking-tight">{challan.challanNumber}</h1>
                             <span className="text-[10px] px-2.5 py-1 rounded-full font-black tracking-widest uppercase shadow-sm bg-blue-500 text-white">
                                 {challan.status}
                             </span>
+                            
+                            <div className="flex items-center gap-2 ml-2">
+                                <button onClick={handleDownloadPDF} disabled={downloading} className="flex items-center gap-1 px-2 py-1 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 rounded-md font-semibold text-[11px] shadow-sm transition-all disabled:opacity-75">
+                                    <Download size={12} /> {downloading ? 'Downloading...' : 'Download'}
+                                </button>
+                                
+                                <button onClick={() => navigate(`/challans/${challan._id}/edit`)} className="flex items-center gap-1 px-2 py-1 bg-white border border-slate-300 rounded-md text-slate-600 hover:text-[#2f62ff] hover:border-[#2f62ff] hover:bg-slate-50 transition-all shadow-sm font-semibold text-[11px]" title="Edit Challan">
+                                    <Edit size={12} /> Edit
+                                </button>
+                            </div>
                         </div>
                         <p className="text-slate-500 text-sm font-medium">Recipient: <span className="text-slate-900">{customer?.companyName}</span></p>
-                    </div>
-
-                    <div className="flex items-center gap-2 ml-4">
-                        <button onClick={handleDownloadPDF} disabled={downloading} className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 rounded-lg font-semibold text-xs shadow-sm transition-all disabled:opacity-75">
-                            <Download size={14} /> {downloading ? 'Downloading...' : 'Download'}
-                        </button>
-                        
-                        <button onClick={() => navigate(`/challans/${challan._id}/edit`)} className="p-1.5 bg-white border border-slate-300 rounded-lg text-slate-600 hover:text-[#2f62ff] hover:border-[#2f62ff] hover:bg-slate-50 transition-all shadow-sm" title="Edit Challan">
-                            <Edit size={14} />
-                        </button>
                     </div>
                 </div>
 
@@ -178,7 +178,7 @@ const ChallanViewer = () => {
             </div>
 
             <div className="flex justify-center">
-                <div className="w-full max-w-4xl bg-white p-12 rounded-lg shadow-sm border border-slate-200 font-sans text-slate-800" ref={quoteRef}>
+                <div className="w-full max-w-4xl bg-white p-12 rounded-md shadow-sm border border-slate-200 font-sans text-slate-800" ref={quoteRef}>
                     <div className="flex justify-between items-start border-b border-slate-100 pb-8 mb-8">
                         <div>
                             {settings?.logoUrl ? (
@@ -236,7 +236,7 @@ const ChallanViewer = () => {
                     </table>
 
                     <div className="flex justify-end mb-10">
-                        <div className="w-80 bg-slate-50 rounded-xl p-5 border border-slate-200">
+                        <div className="w-80 bg-slate-50 rounded-md p-5 border border-slate-200">
                             <div className="space-y-2 text-sm text-slate-600">
                                 <div className="flex justify-between">
                                     <span>Sub Total</span>
@@ -293,7 +293,7 @@ const ChallanViewer = () => {
                     {challan.includeSignature ? (
                         <div className="mt-16 flex justify-end">
                             <div className="text-center">
-                                <div className="border border-slate-200 rounded-lg p-2 w-48 h-20 flex items-center justify-center bg-slate-50 mb-2">
+                                <div className="border border-slate-200 rounded-md p-2 w-48 h-20 flex items-center justify-center bg-slate-50 mb-2">
                                     {settings?.signature ? (
                                         <img src={getImageUrl(settings.signature)} alt="Signature" className="max-h-full max-w-full object-contain" />
                                     ) : (
@@ -344,7 +344,7 @@ const ChallanViewer = () => {
                                     type="email"
                                     value={emailTo}
                                     onChange={e => setEmailTo(e.target.value)}
-                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none"
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-md text-slate-800 text-sm focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none"
                                     placeholder="customer@example.com"
                                     required
                                 />
@@ -356,7 +356,7 @@ const ChallanViewer = () => {
                                     type="text"
                                     value={emailSubject}
                                     onChange={e => setEmailSubject(e.target.value)}
-                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none"
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-md text-slate-800 text-sm focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none"
                                     required
                                 />
                             </div>
@@ -367,7 +367,7 @@ const ChallanViewer = () => {
                                     value={emailMessage}
                                     onChange={e => setEmailMessage(e.target.value)}
                                     rows={5}
-                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none resize-none"
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-md text-slate-800 text-sm focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none resize-none"
                                     required
                                 />
                             </div>
@@ -376,14 +376,14 @@ const ChallanViewer = () => {
                         <div className="p-6 bg-slate-50/50 border-t border-slate-100 flex justify-end gap-3">
                             <button
                                 onClick={() => setIsEmailModalOpen(false)}
-                                className="px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 font-bold text-sm hover:bg-slate-50 hover:border-slate-300 transition-all"
+                                className="px-5 py-2.5 bg-white border border-slate-200 rounded-md text-slate-600 font-bold text-sm hover:bg-slate-50 hover:border-slate-300 transition-all"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleSendEmail}
                                 disabled={sendingEmail}
-                                className="px-5 py-2.5 text-white bg-slate-800 rounded-xl font-bold text-sm shadow-md transition-all hover:bg-slate-900 disabled:opacity-75 flex items-center gap-2"
+                                className="px-5 py-2.5 text-white bg-slate-800 rounded-md font-bold text-sm shadow-md transition-all hover:bg-slate-900 disabled:opacity-75 flex items-center gap-2"
                             >
                                 {sendingEmail ? (
                                     <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Sending...</>

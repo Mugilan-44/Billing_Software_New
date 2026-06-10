@@ -234,7 +234,7 @@ export const TemplateModern = ({ invoice, customer, settings, color, printRef })
     const tax = calcTaxBreakdown(invoice);
     const items = invoice.items || invoice.lineItems || [];
     return (
-        <div className="bg-white p-10 rounded-xl shadow-sm border border-slate-200 font-sans" ref={printRef}>
+        <div className="bg-white p-10 rounded-md shadow-sm border border-slate-200 font-sans" ref={printRef}>
             <div className="flex justify-between items-start pb-8 mb-8" style={{ borderBottom: `3px solid ${color}` }}>
                 <div>
                     {settings?.logoUrl
@@ -298,7 +298,7 @@ export const TemplateModern = ({ invoice, customer, settings, color, printRef })
                     {settings?.bankDetails?.accountNumber && (
                         <div className="mb-4">
                             <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color }}>Bank Details</p>
-                            <div className="text-sm text-slate-700 space-y-0.5 p-4 rounded-lg border" style={{ borderColor: color + '40', backgroundColor: color + '08' }}>
+                            <div className="text-sm text-slate-700 space-y-0.5 p-4 rounded-md border" style={{ borderColor: color + '40', backgroundColor: color + '08' }}>
                                 <p><strong>Bank:</strong> {settings.bankDetails.bankName}</p>
                                 <p><strong>A/C Name:</strong> {settings.bankDetails.accountName}</p>
                                 <p><strong>A/C No:</strong> {settings.bankDetails.accountNumber}</p>
@@ -309,7 +309,7 @@ export const TemplateModern = ({ invoice, customer, settings, color, printRef })
                     {(settings?.upiId || settings?.upiQrUrl) && (
                         <div>
                             <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color }}>UPI Payment</p>
-                            <div className="text-sm text-slate-700 p-4 rounded-lg border" style={{ borderColor: color + '40', backgroundColor: color + '08' }}>
+                            <div className="text-sm text-slate-700 p-4 rounded-md border" style={{ borderColor: color + '40', backgroundColor: color + '08' }}>
                                 {settings.upiId && <p className="font-semibold mb-2">{settings.upiId}</p>}
                                 {settings.upiQrUrl && <img src={getImageUrl(settings.upiQrUrl)} alt="UPI QR" className="w-24 h-24 object-contain" />}
                             </div>
@@ -527,7 +527,7 @@ export const TemplateProfessional = ({ invoice, customer, settings, color, print
                 <div className="flex justify-between items-end">
                     <div className="w-1/2 space-y-4">
                         {settings?.bankDetails?.accountNumber && (
-                            <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100">
+                            <div className="bg-slate-50 p-5 rounded-md border border-slate-100">
                                 <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Bank Details</h4>
                                 <div className="space-y-1 text-xs">
                                     <p className="flex justify-between"><span className="text-slate-500">Bank</span><span className="font-bold">{settings.bankDetails.bankName}</span></p>
@@ -537,7 +537,7 @@ export const TemplateProfessional = ({ invoice, customer, settings, color, print
                             </div>
                         )}
                         {(settings?.upiId || settings?.upiQrUrl) && (
-                            <div className="flex items-center gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                            <div className="flex items-center gap-3 bg-slate-50 p-4 rounded-md border border-slate-100">
                                 {settings.upiQrUrl && <img src={getImageUrl(settings.upiQrUrl)} alt="UPI QR" className="w-20 h-20 object-contain" />}
                                 {settings.upiId && <div><p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Pay via UPI</p><p className="font-bold text-slate-900">{settings.upiId}</p></div>}
                             </div>
@@ -790,7 +790,7 @@ export const TemplateBold = ({ invoice, customer, settings, color, printRef }) =
                 </div>
             </div>
             <div className="p-10">
-                <div className="mb-8 p-5 rounded-2xl bg-slate-50">
+                <div className="mb-8 p-5 rounded-md bg-slate-50">
                     <p className="text-xs font-black uppercase tracking-widest mb-2 text-slate-400">Billed To</p>
                     <p className="text-xl font-black text-slate-900">{customer?.companyName || customer?.displayName}</p>
                     {invoice.billingAddress ? (
@@ -828,7 +828,7 @@ export const TemplateBold = ({ invoice, customer, settings, color, printRef }) =
                 <div className="flex justify-between items-end">
                     <div className="flex gap-6">
                         {settings?.bankDetails?.accountNumber && (
-                            <div className="bg-slate-50 rounded-xl p-4 text-sm">
+                            <div className="bg-slate-50 rounded-md p-4 text-sm">
                                 <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Bank Details</p>
                                 <p>{settings.bankDetails.bankName}</p>
                                 <p>A/C: {settings.bankDetails.accountNumber}</p>
@@ -836,7 +836,7 @@ export const TemplateBold = ({ invoice, customer, settings, color, printRef }) =
                             </div>
                         )}
                         {(settings?.upiId || settings?.upiQrUrl) && (
-                            <div className="bg-slate-50 rounded-xl p-4 text-sm flex items-center gap-3">
+                            <div className="bg-slate-50 rounded-md p-4 text-sm flex items-center gap-3">
                                 {settings.upiQrUrl && <img src={getImageUrl(settings.upiQrUrl)} alt="UPI QR" className="w-16 h-16 object-contain" />}
                                 {settings.upiId && <div><p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">UPI</p><p className="font-mono font-bold">{settings.upiId}</p></div>}
                             </div>
@@ -1076,7 +1076,7 @@ export const TemplateVibrant = ({ invoice, customer, settings, color, printRef }
     const items = invoice.items || invoice.lineItems || [];
     const theme = COLOR_THEMES.find(t => t.value === color) || COLOR_THEMES[0];
     return (
-        <div className="bg-white font-sans overflow-hidden rounded-2xl" ref={printRef}>
+        <div className="bg-white font-sans overflow-hidden rounded-md" ref={printRef}>
             <div className="relative p-10 overflow-hidden" style={{ background: `linear-gradient(135deg, ${color} 0%, ${color}cc 100%)` }}>
                 <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full opacity-20" style={{ backgroundColor: 'white' }}></div>
                 <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full opacity-10" style={{ backgroundColor: 'white' }}></div>
@@ -1087,7 +1087,7 @@ export const TemplateVibrant = ({ invoice, customer, settings, color, printRef }
                         {settings?.gstNumber && <p className="text-white/70 text-sm">GSTIN: {settings.gstNumber}</p>}
                     </div>
                     <div className="text-right">
-                        <div className="bg-white/20  rounded-2xl p-4">
+                        <div className="bg-white/20  rounded-md p-4">
                             <p className="text-white/70 text-xs uppercase tracking-widest">Invoice</p>
                             <p className="text-white text-2xl font-black">{invoice.invoiceNumber}</p>
                             <p className="text-white/70 text-sm">{new Date(invoice.date).toLocaleDateString('en-IN')}</p>
@@ -1097,7 +1097,7 @@ export const TemplateVibrant = ({ invoice, customer, settings, color, printRef }
             </div>
             <div className="p-10">
                 <div className="grid grid-cols-2 gap-8 mb-8">
-                    <div className="p-5 rounded-2xl" style={{ backgroundColor: theme.light, border: `1px solid ${theme.border}` }}>
+                    <div className="p-5 rounded-md" style={{ backgroundColor: theme.light, border: `1px solid ${theme.border}` }}>
                         <p className="text-xs font-black uppercase tracking-widest mb-2" style={{ color }}>Billed To</p>
                         <p className="text-lg font-black text-slate-900">{customer?.companyName || customer?.displayName}</p>
                         {invoice.billingAddress ? (
@@ -1107,7 +1107,7 @@ export const TemplateVibrant = ({ invoice, customer, settings, color, printRef }
                         )}
                         {(customer?.gstNumber || customer?.gstin) && <p className="text-slate-600 text-sm">GSTIN: {customer.gstNumber || customer.gstin}</p>}
                     </div>
-                    <div className="p-5 rounded-2xl" style={{ backgroundColor: theme.light, border: `1px solid ${theme.border}` }}>
+                    <div className="p-5 rounded-md" style={{ backgroundColor: theme.light, border: `1px solid ${theme.border}` }}>
                         <p className="text-xs font-black uppercase tracking-widest mb-2" style={{ color }}>Invoice Summary</p>
                         <div className="space-y-1 text-sm">
                             <div className="flex justify-between"><span className="text-slate-500">Date</span><span className="font-bold">{new Date(invoice.date).toLocaleDateString('en-IN')}</span></div>
@@ -1144,7 +1144,7 @@ export const TemplateVibrant = ({ invoice, customer, settings, color, printRef }
                 <div className="flex justify-between items-end">
                     <div className="flex gap-4">
                         {settings?.bankDetails?.accountNumber && (
-                            <div className="p-4 rounded-xl text-sm" style={{ backgroundColor: theme.light, border: `1px solid ${theme.border}` }}>
+                            <div className="p-4 rounded-md text-sm" style={{ backgroundColor: theme.light, border: `1px solid ${theme.border}` }}>
                                 <p className="text-xs font-black uppercase tracking-widest mb-2" style={{ color }}>Bank</p>
                                 <p className="text-slate-700">{settings.bankDetails.bankName}</p>
                                 <p className="text-slate-700">A/C: {settings.bankDetails.accountNumber}</p>
@@ -1152,13 +1152,13 @@ export const TemplateVibrant = ({ invoice, customer, settings, color, printRef }
                             </div>
                         )}
                         {(settings?.upiId || settings?.upiQrUrl) && (
-                            <div className="p-4 rounded-xl flex items-center gap-3 text-sm" style={{ backgroundColor: theme.light, border: `1px solid ${theme.border}` }}>
+                            <div className="p-4 rounded-md flex items-center gap-3 text-sm" style={{ backgroundColor: theme.light, border: `1px solid ${theme.border}` }}>
                                 {settings.upiQrUrl && <img src={getImageUrl(settings.upiQrUrl)} alt="UPI QR" className="w-16 h-16 object-contain" />}
                                 {settings.upiId && <div><p className="text-xs font-black uppercase tracking-widest mb-1" style={{ color }}>UPI</p><p className="font-mono font-bold text-slate-900">{settings.upiId}</p></div>}
                             </div>
                         )}
                     </div>
-                    <div className="text-right p-6 rounded-2xl min-w-64" style={{ backgroundColor: theme.light, border: `1px solid ${theme.border}` }}>
+                    <div className="text-right p-6 rounded-md min-w-64" style={{ backgroundColor: theme.light, border: `1px solid ${theme.border}` }}>
                         <div className="space-y-1 text-sm mb-3">
                             <div className="flex justify-between text-slate-500"><span>Subtotal</span><span>₹{fmt(invoice.subTotal)}</span></div>
                             {getViewerTaxBreakdown(invoice).map((row, idx) => (
@@ -1414,46 +1414,47 @@ const InvoiceViewer = () => {
             {/* ── Toolbar ── */}
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center py-6 gap-4 no-print">
                 <div className="flex items-center gap-4">
-                    <button onClick={() => navigate('/invoices')} className="group p-3 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm">
+                    <button onClick={() => navigate('/invoices')} className="group p-3 bg-white border border-slate-200 rounded-md text-slate-400 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm">
                         <ArrowLeft size={20} />
                     </button>
                     <div>
-                        <div className="flex items-center gap-3 mb-1">
+                        <div className="flex flex-wrap items-center gap-3 mb-1">
                             <h1 className="text-2xl font-black text-slate-900">#{invoice.invoiceNumber}</h1>
                             <span className={`text-[10px] px-2.5 py-1 rounded-full font-black tracking-widest uppercase ${invoice.status === 'Paid' ? 'bg-emerald-500 text-white' : invoice.status === 'Draft' ? 'bg-slate-400 text-white' : 'bg-amber-400 text-white'}`}>
                                 {invoice.status}
                             </span>
+                            
+                            <div className="flex items-center gap-2 ml-2">
+                                <button
+                                    onClick={handleDownloadPDF}
+                                    disabled={downloading}
+                                    className="flex items-center gap-1 px-2 py-1 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 rounded-md font-semibold text-[11px] shadow-sm transition-all disabled:opacity-75"
+                                >
+                                    {downloading
+                                        ? <><div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" /> Downloading...</>
+                                        : <><Download size={12} /> Download</>
+                                    }
+                                </button>
+                                
+                                <button onClick={() => navigate(`/invoices/${invoice._id}/edit`)} className="flex items-center gap-1 px-2 py-1 bg-white border border-slate-300 rounded-md text-slate-600 hover:text-[#2f62ff] hover:border-[#2f62ff] hover:bg-slate-50 transition-all shadow-sm font-semibold text-[11px]" title="Edit">
+                                    <Edit size={12} /> Edit
+                                </button>
+                            </div>
                         </div>
                         <p className="text-slate-500 text-sm">{customer?.companyName || customer?.displayName}</p>
                     </div>
 
-                    <div className="flex items-center gap-2 ml-4">
-                        <button
-                            onClick={handleDownloadPDF}
-                            disabled={downloading}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 rounded-lg font-semibold text-xs shadow-sm transition-all disabled:opacity-75"
-                        >
-                            {downloading
-                                ? <><div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" /> Downloading...</>
-                                : <><Download size={14} /> Download</>
-                            }
-                        </button>
-                        
-                        <button onClick={() => navigate(`/invoices/${invoice._id}/edit`)} className="p-1.5 bg-white border border-slate-300 rounded-lg text-slate-600 hover:text-[#2f62ff] hover:border-[#2f62ff] hover:bg-slate-50 transition-all shadow-sm" title="Edit">
-                            <Edit size={14} />
-                        </button>
-                    </div>
                 </div>
 
                 <div className="flex items-center gap-2">
                     {invoice.status === 'Draft' && (
-                        <button onClick={handleMarkAsSent} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2f62ff] hover:bg-[#1e50e2] text-white rounded-lg font-semibold text-xs shadow-sm transition-all">
+                        <button onClick={handleMarkAsSent} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2f62ff] hover:bg-[#1e50e2] text-white rounded-md font-semibold text-xs shadow-sm transition-all">
                             <Send size={14} /> Mark as Sent
                         </button>
                     )}
 
                     {['Sent', 'Partial', 'Partially Paid', 'Overdue'].includes(invoice.status) && (
-                        <button onClick={handleRecordPayment} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2f62ff] hover:bg-[#1e50e2] text-white rounded-lg font-semibold text-xs shadow-sm transition-all">
+                        <button onClick={handleRecordPayment} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2f62ff] hover:bg-[#1e50e2] text-white rounded-md font-semibold text-xs shadow-sm transition-all">
                             <CreditCard size={14} /> Record Payment
                         </button>
                     )}
@@ -1477,7 +1478,7 @@ const InvoiceViewer = () => {
 
             {/* ── Invoice Preview ── */}
             <div className="flex justify-center">
-                <div className="w-full max-w-4xl shadow-2xl rounded-lg overflow-hidden">
+                <div className="w-full max-w-4xl shadow-2xl rounded-md overflow-hidden">
                     {templateMap[template] || templateMap.modern}
                 </div>
             </div>
@@ -1485,7 +1486,7 @@ const InvoiceViewer = () => {
             {/* ── Customize Design (Template & Color) ── */}
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-6 p-6 bg-white border border-slate-100 rounded-3xl shadow-sm max-w-4xl mx-auto no-print">
                 <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-blue-50 text-blue-600 rounded-2xl">
+                    <div className="p-2.5 bg-blue-50 text-blue-600 rounded-md">
                         <Palette size={20} />
                     </div>
                     <div>
@@ -1500,7 +1501,7 @@ const InvoiceViewer = () => {
                         <select
                             value={template}
                             onChange={e => handleTemplateChange(e.target.value)}
-                            className="bg-slate-900 text-white border-none rounded-xl py-2 px-3 text-sm font-bold shadow-lg cursor-pointer focus:ring-2 focus:ring-blue-500/20"
+                            className="bg-slate-900 text-white border-none rounded-md py-2 px-3 text-sm font-bold shadow-lg cursor-pointer focus:ring-2 focus:ring-blue-500/20"
                         >
                             {TEMPLATES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                         </select>
@@ -1554,7 +1555,7 @@ const InvoiceViewer = () => {
                                     value={emailFrom}
                                     onChange={e => setEmailFrom(e.target.value)}
                                     placeholder="your-email@company.com"
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                                 />
                             </div>
 
@@ -1566,7 +1567,7 @@ const InvoiceViewer = () => {
                                     value={emailTo}
                                     onChange={e => setEmailTo(e.target.value)}
                                     placeholder="customer-email@domain.com"
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                                     required
                                 />
                             </div>
@@ -1579,7 +1580,7 @@ const InvoiceViewer = () => {
                                     value={emailSubject}
                                     onChange={e => setEmailSubject(e.target.value)}
                                     placeholder="Email Subject"
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                                     required
                                 />
                             </div>
@@ -1592,13 +1593,13 @@ const InvoiceViewer = () => {
                                     value={emailMessage}
                                     onChange={e => setEmailMessage(e.target.value)}
                                     placeholder="Type your message details..."
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium resize-none leading-relaxed"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium resize-none leading-relaxed"
                                 />
                             </div>
 
                             {/* Attached PDF row */}
-                            <div className="flex items-center gap-3 bg-blue-50/50 border border-blue-100 rounded-2xl p-3.5">
-                                <div className="p-2 bg-blue-500 text-white rounded-xl">
+                            <div className="flex items-center gap-3 bg-blue-50/50 border border-blue-100 rounded-md p-3.5">
+                                <div className="p-2 bg-blue-500 text-white rounded-md">
                                     <FileText size={18} />
                                 </div>
                                 <div className="flex-1 overflow-hidden">
@@ -1616,7 +1617,7 @@ const InvoiceViewer = () => {
                             <button
                                 type="button"
                                 onClick={() => setIsEmailModalOpen(false)}
-                                className="px-5 py-2.5 border border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-100 transition-all"
+                                className="px-5 py-2.5 border border-slate-200 text-slate-600 rounded-md text-sm font-bold hover:bg-slate-100 transition-all"
                             >
                                 Cancel
                             </button>
@@ -1624,7 +1625,7 @@ const InvoiceViewer = () => {
                                 type="button"
                                 onClick={handleSendEmail}
                                 disabled={sendingEmail}
-                                className="flex items-center justify-center gap-2 px-6 py-2.5 text-white rounded-xl text-sm font-bold shadow-lg transition-all disabled:opacity-70 bg-blue-600 hover:bg-blue-700"
+                                className="flex items-center justify-center gap-2 px-6 py-2.5 text-white rounded-md text-sm font-bold shadow-lg transition-all disabled:opacity-70 bg-blue-600 hover:bg-blue-700"
                                 style={{ backgroundColor: accentColor }}
                             >
                                 {sendingEmail ? (

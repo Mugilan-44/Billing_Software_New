@@ -27,7 +27,7 @@ export async function getNextSequenceValue(sequenceName, prefix, companyId, sess
       const counter = await Counter.findOneAndUpdate(
         query,
         { $inc: { seq: 1 } },
-        { new: true, upsert: true, session }
+        { new: true, upsert: true }
       );
       const generatedNumber = `${prefix}-${String(counter.seq).padStart(6, '0')}`;
       let queryExists = Model.findOne({ companyId: companyId || null, [field]: generatedNumber }).select('_id');
@@ -43,7 +43,7 @@ export async function getNextSequenceValue(sequenceName, prefix, companyId, sess
   const counter = await Counter.findOneAndUpdate(
     query,
     { $inc: { seq: 1 } },
-    { new: true, upsert: true, session }
+    { new: true, upsert: true }
   );
   return `${prefix}-${String(counter.seq).padStart(6, '0')}`;
 }
@@ -68,7 +68,7 @@ export async function getNextCustomSequence(companyId, type, taxMode, session = 
       withTax: { auto: true, prefix: `${defaultPref}-WT-`, nextNumber: 1, digits: 4 },
       withoutTax: { auto: true, prefix: `${defaultPref}-NT-`, nextNumber: 1, digits: 4 }
     };
-    await settings.save(session ? { session } : {});
+    await settings.save();
   }
 
   const config = settings.numberingSettings[type][modeKey];
@@ -83,7 +83,7 @@ export async function getNextCustomSequence(companyId, type, taxMode, session = 
       const updatedSettings = await CompanySettings.findOneAndUpdate(
         { companyId },
         { $inc: { [updateKey]: 1 } },
-        { new: false, session }
+        { new: false }
       );
       const currentNum = updatedSettings.numberingSettings[type][modeKey].nextNumber;
       const prefix = config.prefix || '';
@@ -103,7 +103,7 @@ export async function getNextCustomSequence(companyId, type, taxMode, session = 
   const updatedSettings = await CompanySettings.findOneAndUpdate(
     { companyId },
     { $inc: { [updateKey]: 1 } },
-    { new: false, session }
+    { new: false }
   );
   const currentNum = updatedSettings.numberingSettings[type][modeKey].nextNumber;
   const prefix = config.prefix || '';

@@ -111,7 +111,7 @@ const PublicInvoiceViewer = () => {
             <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/80 px-6 py-4 no-print shadow-sm">
                 <div className="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20 font-black text-lg">
+                        <div className="w-10 h-10 bg-blue-600 rounded-md flex items-center justify-center text-white shadow-lg shadow-blue-500/20 font-black text-lg">
                             P
                         </div>
                         <div>
@@ -128,7 +128,7 @@ const PublicInvoiceViewer = () => {
                     <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
                         <button
                             onClick={() => window.print()}
-                            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-slate-300 rounded-xl text-slate-700 text-xs font-bold shadow-sm hover:bg-slate-50 transition-all"
+                            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-slate-300 rounded-md text-slate-700 text-xs font-bold shadow-sm hover:bg-slate-50 transition-all"
                             title="Print Invoice"
                         >
                             <Printer size={15} />
@@ -137,7 +137,7 @@ const PublicInvoiceViewer = () => {
                         <button
                             onClick={handleDownloadPDF}
                             disabled={downloading}
-                            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-2.5 text-white rounded-xl text-xs font-bold shadow-lg transition-all disabled:opacity-70"
+                            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-2.5 text-white rounded-md text-xs font-bold shadow-lg transition-all disabled:opacity-70"
                             style={{ backgroundColor: accentColor }}
                             title="Download PDF"
                         >
@@ -160,7 +160,7 @@ const PublicInvoiceViewer = () => {
             {/* Invoice Body Container */}
             <div className="max-w-4xl mx-auto px-4 mt-8 flex flex-col gap-6">
                 {/* Security/Access Banner */}
-                <div className="no-print bg-blue-50/50 border border-blue-100 rounded-2xl p-4 flex items-start gap-3">
+                <div className="no-print bg-blue-50/50 border border-blue-100 rounded-md p-4 flex items-start gap-3">
                     <div className="text-blue-600 mt-0.5">
                         <CheckCircle size={18} />
                     </div>
@@ -173,7 +173,7 @@ const PublicInvoiceViewer = () => {
                 </div>
 
                 {/* Main Rendered Invoice Page */}
-                <div className="shadow-2xl shadow-slate-100 rounded-2xl overflow-hidden border border-slate-100 bg-white">
+                <div className="shadow-2xl shadow-slate-100 rounded-md overflow-hidden border border-slate-100 bg-white">
                     {templateMap[template] || templateMap.modern}
                 </div>
             </div>

@@ -103,32 +103,33 @@ const SalesOrderViewer = () => {
         <div className="max-w-6xl mx-auto pb-20 px-4 font-sans text-slate-800">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center py-8 gap-6 no-print">
                 <div className="flex items-center gap-5">
-                    <button onClick={() => navigate('/orders')} className="group p-3 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm">
+                    <button onClick={() => navigate('/orders')} className="group p-3 bg-white border border-slate-200 rounded-md text-slate-400 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm">
                         <ArrowLeft size={20} />
                     </button>
                     <div>
-                        <div className="flex items-center gap-3 mb-1">
+                        <div className="flex flex-wrap items-center gap-3 mb-1">
                             <h1 className="text-3xl font-black text-slate-900 tracking-tight">{order.orderNumber}</h1>
                             <span className={`text-[10px] px-2.5 py-1 rounded-full font-black tracking-widest uppercase shadow-sm ${order.status === 'Confirmed' ? 'bg-emerald-500 text-white' : order.status === 'Cancelled' ? 'bg-rose-500 text-white' : 'bg-blue-500 text-white'}`}>
                                 {order.status}
                             </span>
+                            
+                            <div className="flex items-center gap-2 ml-2">
+                                <button onClick={handleDownloadPDF} disabled={downloading} className="flex items-center gap-1 px-2 py-1 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 rounded-md font-semibold text-[11px] shadow-sm transition-all disabled:opacity-75">
+                                    {downloading ? (
+                                        <><div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" /> Downloading...</>
+                                    ) : (
+                                        <><Download size={12} /> Download</>
+                                    )}
+                                </button>
+                                
+                                <button onClick={() => navigate(`/orders/${order._id}/edit`)} className="flex items-center gap-1 px-2 py-1 bg-white border border-slate-300 rounded-md text-slate-600 hover:text-[#2f62ff] hover:border-[#2f62ff] hover:bg-slate-50 transition-all shadow-sm font-semibold text-[11px]" title="Edit Sales Order">
+                                    <Edit size={12} /> Edit
+                                </button>
+                            </div>
                         </div>
                         <p className="text-slate-500 text-sm font-medium">Customer: <span className="text-slate-900">{customer?.companyName}</span></p>
                     </div>
 
-                    <div className="flex items-center gap-2 ml-4">
-                        <button onClick={handleDownloadPDF} disabled={downloading} className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 rounded-lg font-semibold text-xs shadow-sm transition-all disabled:opacity-75">
-                            {downloading ? (
-                                <><div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" /> Downloading...</>
-                            ) : (
-                                <><Download size={14} /> Download</>
-                            )}
-                        </button>
-                        
-                        <button onClick={() => navigate(`/orders/${order._id}/edit`)} className="p-1.5 bg-white border border-slate-300 rounded-lg text-slate-600 hover:text-[#2f62ff] hover:border-[#2f62ff] hover:bg-slate-50 transition-all shadow-sm" title="Edit Sales Order">
-                            <Edit size={14} />
-                        </button>
-                    </div>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -147,7 +148,7 @@ const SalesOrderViewer = () => {
             </div>
 
             <div className="flex justify-center">
-                <div className="w-full max-w-4xl bg-white p-12 rounded-lg shadow-sm border border-slate-200" ref={quoteRef}>
+                <div className="w-full max-w-4xl bg-white p-12 rounded-md shadow-sm border border-slate-200" ref={quoteRef}>
                     <div className="flex justify-between items-start border-b border-slate-100 pb-8 mb-8">
                         <div>
                             {settings?.logoUrl ? (
@@ -263,7 +264,7 @@ const SalesOrderViewer = () => {
                     {order.includeSignature && (
                         <div className="mt-10 pt-6 border-t border-slate-100 flex justify-end">
                             <div className="text-center">
-                                <div className="border border-slate-200 rounded-lg p-2 w-48 h-20 flex items-center justify-center bg-slate-50 mb-2">
+                                <div className="border border-slate-200 rounded-md p-2 w-48 h-20 flex items-center justify-center bg-slate-50 mb-2">
                                     {settings?.signature ? (
                                         <img src={getImageUrl(settings.signature)} alt="Signature" className="max-h-full max-w-full object-contain" />
                                     ) : (
