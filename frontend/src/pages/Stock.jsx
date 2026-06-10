@@ -42,9 +42,6 @@ const Stock = () => {
             {/* Header Area */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center shadow-inner">
-                        <Archive size={24} />
-                    </div>
                     <div>
                         <h1 className="text-2xl font-black text-slate-900 tracking-tight">Stock Adjustments</h1>
                         <p className="text-sm text-slate-500 font-medium tracking-tight">Real-time inventory levels for active goods</p>
