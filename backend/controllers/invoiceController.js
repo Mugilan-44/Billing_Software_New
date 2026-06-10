@@ -96,7 +96,7 @@ export const createInvoice = async (req, res) => {
         const companySettingsQuery = req.user.companyId
           ? { companyId: req.user.companyId }
           : {};
-        const companySettings = await CompanySettings.findOne(companySettingsQuery).lean().session(session);
+        const companySettings = await CompanySettings.findOne(companySettingsQuery).lean();
 
         const companyStateCode  = companySettings?.stateCode
           || (companySettings?.gstin || companySettings?.gstNumber || '').substring(0, 2)

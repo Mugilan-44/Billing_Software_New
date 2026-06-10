@@ -49,9 +49,7 @@ export async function getNextSequenceValue(sequenceName, prefix, companyId, sess
 }
 
 export async function getNextCustomSequence(companyId, type, taxMode, session = null) {
-  let settingsQuery = CompanySettings.findOne({ companyId });
-  if (session) settingsQuery = settingsQuery.session(session);
-  let settings = await settingsQuery;
+  let settings = await CompanySettings.findOne({ companyId });
   if (!settings) {
     const defaultPrefix = type === 'invoice' ? 'INV' : type === 'challan' ? 'CHL' : type.slice(0, 3).toUpperCase();
     const modeSuffix = taxMode === 'WITHOUT_TAX' ? 'NT' : 'WT';

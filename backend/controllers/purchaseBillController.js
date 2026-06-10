@@ -36,7 +36,7 @@ export const createPurchaseBill = async (req, res) => {
       const vendor = await findDocument(Vendor, vendorId, req.user, session);
       if (!vendor) throw new Error('Vendor not found');
 
-      const companySettings = await CompanySettings.findOne({ companyId: req.user.companyId || null }).session(session);
+      const companySettings = await CompanySettings.findOne({ companyId: req.user.companyId || null });
       const companyStateCode = companySettings?.stateCode || (companySettings?.gstin ? companySettings.gstin.substring(0, 2) : null);
       const vendorStateCode = vendor?.stateCode || (vendor?.gstNumber ? vendor.gstNumber.substring(0, 2) : null);
 
@@ -476,7 +476,7 @@ export const updatePurchaseBill = async (req, res) => {
 
     // ── 3. Calculate New Totals & items ──────────────────────────────
     const sourceItems = lineItems || items || [];
-    const companySettings = await CompanySettings.findOne({ companyId: req.user.companyId || null }).session(session);
+    const companySettings = await CompanySettings.findOne({ companyId: req.user.companyId || null });
     const companyStateCode = companySettings?.stateCode || (companySettings?.gstin ? companySettings.gstin.substring(0, 2) : null);
     
     const activeVendorId = vendorId || bill.vendorId;
