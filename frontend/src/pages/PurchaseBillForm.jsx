@@ -377,7 +377,7 @@ const PurchaseBillForm = () => {
             itemId: defaultItem._id,
             name: defaultItem.name,
             quantity: 1,
-            rate: defaultItem.purchasePrice || 0,
+            rate: defaultItem.purchasePrice || defaultItem.sellingPrice || 0,
             gstPercentage: defaultItem.gstPercentage
         }]);
     };
@@ -389,7 +389,7 @@ const PurchaseBillForm = () => {
         if (field === 'itemId') {
             const dbItem = catalogItems.find(c => c._id === value);
             if (dbItem) {
-                newItems[index] = { ...newItems[index], itemId: dbItem._id, name: dbItem.name, rate: dbItem.purchasePrice || 0, gstPercentage: dbItem.gstPercentage };
+                newItems[index] = { ...newItems[index], itemId: dbItem._id, name: dbItem.name, rate: dbItem.purchasePrice || dbItem.sellingPrice || 0, gstPercentage: dbItem.gstPercentage };
             }
         } else {
             newItems[index] = { ...newItems[index], [field]: Number(value) || value };
