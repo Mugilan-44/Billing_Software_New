@@ -65,13 +65,9 @@ const QuotationViewer = () => {
             await axios.put(`/api/quotations/${id}/status`, { status: 'Accepted' }, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            showToast('Quotation accepted successfully!', 'success');
-            if (window.confirm("Quotation accepted! Do you want to convert it to an Invoice now?")) {
-                navigate(`/invoices/new?quoteId=${id}`);
-            } else {
-                const res = await axios.get(`/api/public/quotations/${id}`);
-                setQuoteData(res.data.data);
-            }
+            showToast('Quotation accepted!', 'success');
+            const res = await axios.get(`/api/public/quotations/${id}`);
+            setQuoteData(res.data.data);
         } catch (err) {
             console.error("Error accepting quotation", err);
             showToast(err.response?.data?.message || "Failed to accept quotation.", "error");
@@ -280,66 +276,32 @@ const QuotationViewer = () => {
                         <ArrowLeft size={20} />
                     </button>
                     <div>
-                        <div className="flex items-center gap-3 mb-1">
+                        <div className="flex items-center flex-wrap gap-3 mb-1">
                             <h1 className="text-3xl font-black text-slate-900 tracking-tight">{quote.quoteNumber}</h1>
                             <span className={`text-[10px] px-2.5 py-1 rounded-full font-black tracking-widest uppercase shadow-sm ${quote.status === 'Accepted' ? 'bg-emerald-500 text-white' : quote.status === 'Rejected' ? 'bg-rose-500 text-white' : 'bg-blue-500 text-white'}`}>
                                 {quote.status}
                             </span>
+                            
+                            <div className="flex items-center gap-2 ml-2">
+                                {(quote.status === 'Draft' || quote.status === 'Sent') && (
+                                    <button onClick={handleAccept} className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold text-xs shadow-sm transition-all">
+                                        <Check size={14} /> Accept
+                                    </button>
+                                )}
+                                
+                                {quote.status === 'Accepted' && (
+                                    <button onClick={() => navigate(`/invoices/new?quoteId=${quote._id}`)} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2f62ff] hover:bg-[#1e50e2] text-white rounded-xl font-semibold text-xs shadow-sm transition-all">
+                                        <ClipboardList size={14} /> Convert to Invoice
+                                    </button>
+                                )}
+
+                                <button onClick={handleDownloadPDF} disabled={downloading} className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 rounded-xl font-semibold text-xs shadow-sm transition-all disabled:opacity-75">
+                                    <Download size={14} /> {downloading ? 'Downloading...' : 'Download'}
+                                </button>
+                            </div>
                         </div>
                         <p className="text-slate-500 text-sm font-medium">Customer: <span className="text-slate-900">{customer?.companyName}</span></p>
                     </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3">
-                    <button onClick={() => navigate(`/quotations/${quote._id}/edit`)} className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm" title="Edit Quote">
-                        <Edit size={20} />
-                    </button>
-
-                    <ActionDropdown>
-                        <button onClick={() => window.print()}>
-                            <Printer size={20} /> Print Quote
-                        </button>
-                        <button onClick={handleSendEmail}>
-                            <Mail size={20} /> Email Quote
-                        </button>
-                        <button onClick={handleDeleteQuote} className="text-red-600">
-                            <Trash2 size={20} /> Delete
-                        </button>
-                    </ActionDropdown>
-
-                    {quote.status === 'Draft' && (
-                        <button onClick={handleMarkAsSent} className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-medium text-sm shadow-sm transition-all">
-                            <Send size={16} /> Mark as Sent
-                        </button>
-                    )}
-
-                    {(quote.status === 'Draft' || quote.status === 'Sent') && (
-                        <>
-                            <button onClick={handleAccept} className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-medium text-sm shadow-sm transition-all">
-                                <Check size={16} /> Accept
-                            </button>
-                            <button onClick={handleReject} className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-xl font-medium text-sm shadow-sm transition-all">
-                                <X size={16} /> Reject
-                            </button>
-                        </>
-                    )}
-
-                    <button onClick={() => navigate(`/invoices/new?quoteId=${quote._id}`)} className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-medium text-sm shadow-sm transition-all">
-                        <ClipboardList size={16} /> Convert to Invoice
-                    </button>
-
-                    <button onClick={handleDownloadPDF} disabled={downloading} className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-medium text-sm shadow-sm transition-all disabled:opacity-75">
-                        {downloading ? (
-                            <>
-                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                Downloading...
-                            </>
-                        ) : (
-                            <>
-                                <Download size={16} /> Download
-                            </>
-                        )}
-                    </button>
                 </div>
             </div>
 

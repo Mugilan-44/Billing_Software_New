@@ -1423,55 +1423,53 @@ const InvoiceViewer = () => {
                             <span className={`text-[10px] px-2.5 py-1 rounded-full font-black tracking-widest uppercase ${invoice.status === 'Paid' ? 'bg-emerald-500 text-white' : invoice.status === 'Draft' ? 'bg-slate-400 text-white' : 'bg-amber-400 text-white'}`}>
                                 {invoice.status}
                             </span>
+                            
+                            <div className="flex items-center gap-2 ml-2">
+                                {invoice.status === 'Draft' && (
+                                    <button onClick={handleMarkAsSent} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2f62ff] hover:bg-[#1e50e2] text-white rounded-xl font-semibold text-xs shadow-sm transition-all">
+                                        <Send size={14} /> Mark as Sent
+                                    </button>
+                                )}
+
+                                {['Sent', 'Partial', 'Partially Paid', 'Overdue'].includes(invoice.status) && (
+                                    <button onClick={handleRecordPayment} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2f62ff] hover:bg-[#1e50e2] text-white rounded-xl font-semibold text-xs shadow-sm transition-all">
+                                        <CreditCard size={14} /> Record Payment
+                                    </button>
+                                )}
+
+                                <button
+                                    onClick={handleDownloadPDF}
+                                    disabled={downloading}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 rounded-xl font-semibold text-xs shadow-sm transition-all disabled:opacity-75"
+                                >
+                                    {downloading
+                                        ? <><div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" /> Downloading...</>
+                                        : <><Download size={14} /> Download</>
+                                    }
+                                </button>
+                                
+                                <button onClick={() => navigate(`/invoices/${invoice._id}/edit`)} className="p-1.5 bg-white border border-slate-300 rounded-xl text-slate-600 hover:text-[#2f62ff] hover:border-[#2f62ff] hover:bg-slate-50 transition-all shadow-sm" title="Edit">
+                                    <Edit size={14} />
+                                </button>
+
+                                <ActionDropdown>
+                                    <button onClick={() => window.print()}>
+                                        <Printer size={16} /> Print
+                                    </button>
+                                    <button onClick={handleSendMailGmail}>
+                                        <Mail size={16} /> Email (Gmail)
+                                    </button>
+                                    <button onClick={handleCopyInvoiceLink}>
+                                        <Copy size={16} /> Copy Link
+                                    </button>
+                                    <button onClick={handleDeleteInvoice} className="text-red-600">
+                                        <Trash2 size={16} /> Delete
+                                    </button>
+                                </ActionDropdown>
+                            </div>
                         </div>
                         <p className="text-slate-500 text-sm">{customer?.companyName || customer?.displayName}</p>
                     </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                    {invoice.status === 'Draft' && (
-                        <button onClick={handleMarkAsSent} className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-medium text-sm shadow-sm transition-all">
-                            <Send size={16} /> Mark as Sent
-                        </button>
-                    )}
-
-                    {['Sent', 'Partial', 'Partially Paid', 'Overdue'].includes(invoice.status) && (
-                        <button onClick={handleRecordPayment} className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-medium text-sm shadow-sm transition-all">
-                            <CreditCard size={16} /> Record Payment
-                        </button>
-                    )}
-
-                    <div className="h-8 w-px bg-slate-200 mx-1 hidden sm:block"></div>
-
-                    <button onClick={() => navigate(`/invoices/${invoice._id}/edit`)} className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm" title="Edit">
-                        <Edit size={18} />
-                    </button>
-
-                    <ActionDropdown>
-                        <button onClick={() => window.print()}>
-                            <Printer size={18} /> Print
-                        </button>
-                        <button onClick={handleSendMailGmail}>
-                            <Mail size={18} /> Email (Gmail)
-                        </button>
-                        <button onClick={handleCopyInvoiceLink}>
-                            <Copy size={18} /> Copy Link
-                        </button>
-                        <button onClick={handleDeleteInvoice} className="text-red-600">
-                            <Trash2 size={18} /> Delete
-                        </button>
-                    </ActionDropdown>
-
-                    <button
-                        onClick={handleDownloadPDF}
-                        disabled={downloading}
-                        className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-medium text-sm shadow-sm transition-all disabled:opacity-70"
-                    >
-                        {downloading
-                            ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Downloading...</>
-                            : <><Download size={16} /> Download</>
-                        }
-                    </button>
                 </div>
             </div>
 

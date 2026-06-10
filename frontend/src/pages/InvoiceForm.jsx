@@ -695,9 +695,9 @@ const InvoiceForm = () => {
             } else {
                 await axios.post('/api/invoices', payload);
             }
-            // Fix: Wait for state updates (isFormDirty = false) to apply before navigating
             setIsFormDirty(false);
             localStorage.removeItem('invoice_form_draft');
+            showToast(`Invoice ${isEdit ? 'updated' : 'saved'} successfully!`, 'success');
             setTimeout(() => {
                 navigate('/invoices');
             }, 100);
@@ -1405,18 +1405,31 @@ const InvoiceForm = () => {
                             <div className="flex items-center justify-between">
                                 <label className="text-sm font-medium text-slate-700">Amount Received (₹)</label>
                             </div>
-                            <div className="relative">
-                                <span className="absolute left-3 top-2.5 text-slate-400 text-sm">₹</span>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    step="0.01"
-                                    max={totals.grandTotal}
-                                    className="input-field pl-8 w-full"
-                                    value={amountPaid}
-                                    onChange={e => setAmountPaid(e.target.value === '' ? '' : Math.min(Number(e.target.value), totals.grandTotal))}
-                                    placeholder="0.00"
-                                />
+                            <div className="flex items-center gap-3">
+                                <div className="relative flex-1">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-bold">₹</span>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        max={totals.grandTotal}
+                                        className="input-field pl-8 w-full"
+                                        value={amountPaid}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            if (val === '') {
+                                                setAmountPaid('');
+                                                return;
+                                            }
+                                            if (Number(val) > totals.grandTotal) {
+                                                setAmountPaid(totals.grandTotal);
+                                            } else {
+                                                setAmountPaid(val);
+                                            }
+                                        }}
+                                        placeholder="0.00"
+                                    />
+                                </div>
                             </div>
                             {amountPaid > 0 && (
                                 <div className="flex items-center justify-between text-sm font-bold text-red-500 mt-1">

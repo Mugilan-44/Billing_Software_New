@@ -160,10 +160,8 @@ export const createInvoice = async (req, res) => {
         invoiceNumber: req.body.invoiceNumber || undefined
       };
 
-      if (req.user.role !== 'SUPER_ADMIN') {
-        invoicePayload.companyId = req.user.companyId;
-        invoicePayload.branchId  = req.user.branchId;
-      }
+      invoicePayload.companyId = customer.companyId || req.user.companyId || null;
+      invoicePayload.branchId  = customer.branchId || req.user.branchId || null;
 
       const invoice = new Invoice(invoicePayload);
       await invoice.save({ session });
@@ -192,7 +190,9 @@ export const createInvoice = async (req, res) => {
       }], { session });
 
       if (amountPaid > 0) {
-        const paymentNumber = await getNextSequenceValue('payment', 'PMT', req.user.companyId);
+        const companyId = invoice.companyId || customer.companyId || req.user.companyId;
+        const branchId = invoice.branchId || customer.branchId || req.user.branchId;
+        const paymentNumber = await getNextSequenceValue('payment', 'PMT', companyId);
         const payment = new Payment({
           paymentNumber,
           invoiceId: invoice._id,
@@ -205,10 +205,8 @@ export const createInvoice = async (req, res) => {
           reference: `Advance payment for Invoice ${invoice.invoiceNumber}`,
           notes: 'Auto-generated payment from invoice creation',
           createdBy: req.user._id,
-          ...(req.user.role !== 'SUPER_ADMIN' && {
-            companyId: req.user.companyId,
-            branchId:  req.user.branchId,
-          }),
+          companyId,
+          branchId,
         });
         await payment.save({ session });
 
@@ -406,10 +404,8 @@ export const createInvoice = async (req, res) => {
     if (date) invoicePayload.date = date;
     if (status) invoicePayload.status = status;
 
-    if (req.user.role !== 'SUPER_ADMIN') {
-      invoicePayload.companyId = req.user.companyId;
-      invoicePayload.branchId  = req.user.branchId;
-    }
+    invoicePayload.companyId = customer.companyId || req.user.companyId || null;
+    invoicePayload.branchId  = customer.branchId || req.user.branchId || null;
 
     const invoice = new Invoice(invoicePayload);
     await invoice.save();
@@ -432,7 +428,9 @@ export const createInvoice = async (req, res) => {
     await ledgerEntry.save();
 
     if (amountPaid > 0) {
-      const paymentNumber = await getNextSequenceValue('payment', 'PMT', req.user.companyId);
+      const companyId = invoice.companyId || customer.companyId || req.user.companyId;
+      const branchId = invoice.branchId || customer.branchId || req.user.branchId;
+      const paymentNumber = await getNextSequenceValue('payment', 'PMT', companyId);
       const payment = new Payment({
         paymentNumber,
         invoiceId: invoice._id,
@@ -445,10 +443,8 @@ export const createInvoice = async (req, res) => {
         reference: `Advance payment for Invoice ${invoice.invoiceNumber}`,
         notes: 'Auto-generated payment from invoice creation',
         createdBy: req.user._id,
-        ...(req.user.role !== 'SUPER_ADMIN' && {
-          companyId: req.user.companyId,
-          branchId:  req.user.branchId,
-        }),
+        companyId,
+        branchId,
       });
       await payment.save();
 
