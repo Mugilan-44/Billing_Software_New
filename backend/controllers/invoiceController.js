@@ -74,7 +74,10 @@ export const createInvoice = async (req, res) => {
   const parsed = createInvoiceSchema.safeParse(req.body);
 
   if (!parsed.success) {
-    console.warn('[Zod Validation Warning] createInvoice validation failed. Errors:', parsed.error.errors);
+    console.warn('[Zod Validation Warning] createInvoice validation failed. Errors:', JSON.stringify(parsed.error.errors));
+    console.warn('[Zod Debug] req.body amountPaid:', req.body.amountPaid, 'type:', typeof req.body.amountPaid);
+  } else {
+    console.log('[Invoice] Zod validation passed. amountPaid from parsed.data:', parsed.data.amountPaid);
   }
 
   if (parsed.success) {
@@ -308,6 +311,7 @@ export const createInvoice = async (req, res) => {
       includeSignature,
       amountPaid = 0,
     } = req.body;
+    const amountPaidNum = Number(amountPaid) || 0;  // always coerce to number
 
     const customer = await Customer.findById(customerId);
     if (!customer) throw new Error('Customer not found');
@@ -394,8 +398,8 @@ export const createInvoice = async (req, res) => {
       taxAmount:   r(totalTax),   // FIX C2: always populate
       roundOff,
       grandTotal,
-      balanceDue:  grandTotal - amountPaid,
-      amountPaid:  amountPaid,
+      balanceDue:  grandTotal - amountPaidNum,
+      amountPaid:  amountPaidNum,
       notes,
       dueDate,
       billingAddress,
@@ -432,7 +436,7 @@ export const createInvoice = async (req, res) => {
     });
     await ledgerEntry.save();
 
-    if (amountPaid > 0) {
+    if (amountPaidNum > 0) {
       const companyId = invoice.companyId || customer.companyId || req.user.companyId;
       const branchId = invoice.branchId || customer.branchId || req.user.branchId;
       const paymentNumber = await getNextSequenceValue('payment', 'PMT', companyId);
@@ -440,7 +444,7 @@ export const createInvoice = async (req, res) => {
         paymentNumber,
         invoiceId: invoice._id,
         customerId: invoice.customerId,
-        amount: amountPaid,
+        amount: amountPaidNum,
         date: invoice.date || new Date(),
         paymentDate: invoice.date || new Date(),
         mode: 'Cash',
@@ -460,7 +464,7 @@ export const createInvoice = async (req, res) => {
         type: 'Payment',
         referenceId: payment._id,
         description: `Payment Received (Ref: ${payment.paymentNumber})`,
-        credit: amountPaid,
+        credit: amountPaidNum,
         debit: 0,
         date: payment.date,
         balance: 0,

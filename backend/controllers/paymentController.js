@@ -212,7 +212,8 @@ export const getPayments = async (req, res) => {
 
     if (req.user.role !== 'SUPER_ADMIN') {
       filter.companyId = req.user.companyId;
-      filter.branchId  = req.user.branchId;
+      // Note: do NOT filter by branchId — payments may be created with different
+      // branch values and company-level isolation is sufficient.
     } else if (req.user.role === 'CUSTOMER') {
       filter.customerId = req.user.customerId;
     }

@@ -20,7 +20,7 @@ export const createInvoiceSchema = z.object({
   lineItems:          z.array(lineItemSchema).min(1, 'At least one line item is required'),
   invoiceDiscount:    z.number().min(0).default(0),   // invoice-level absolute discount
   discount:           z.number().optional().default(0),
-  amountPaid:         z.number().min(0).optional().default(0),
+  amountPaid:         z.coerce.number().min(0).optional().default(0),
   placeOfSupply:      z.string().optional(),           // GST compliance
   notes:              z.string().optional(),
   paymentTerms:       z.string().optional(),

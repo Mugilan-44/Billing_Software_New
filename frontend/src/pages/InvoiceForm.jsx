@@ -1430,13 +1430,14 @@ const InvoiceForm = () => {
                                         onChange={(e) => {
                                             const val = e.target.value;
                                             if (val === '') {
-                                                setAmountPaid('');
+                                                setAmountPaid(0);
                                                 return;
                                             }
-                                            if (Number(val) > totals.grandTotal) {
+                                            const numVal = parseFloat(val) || 0;
+                                            if (numVal > totals.grandTotal) {
                                                 setAmountPaid(totals.grandTotal);
                                             } else {
-                                                setAmountPaid(val);
+                                                setAmountPaid(numVal);
                                             }
                                         }}
                                         placeholder="0.00"

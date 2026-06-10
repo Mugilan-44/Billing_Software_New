@@ -24,10 +24,12 @@ export async function getNextSequenceValue(sequenceName, prefix, companyId, sess
     const Model = mongoose.model(mapping.modelName);
     const field = mapping.field;
     while (true) {
+      const opts = { new: true, upsert: true };
+      if (session) opts.session = session;
       const counter = await Counter.findOneAndUpdate(
         query,
         { $inc: { seq: 1 } },
-        { new: true, upsert: true }
+        opts
       );
       const generatedNumber = `${prefix}-${String(counter.seq).padStart(6, '0')}`;
       let queryExists = Model.findOne({ companyId: companyId || null, [field]: generatedNumber }).select('_id');
