@@ -85,7 +85,7 @@ export const createInvoice = async (req, res) => {
               useProductSpecificTax = true,
               tdsTcsType = 'None', tdsPercentage = 0, tcsPercentage = 0,
               includeTerms = true, includeSignature = false,
-              billingAddress, shippingAddress } = parsed.data;
+              billingAddress, shippingAddress, amountPaid = 0 } = parsed.data;
 
       const customer = await Customer.findById(customerId).session(session);
       if (!customer) throw new Error('Customer not found');
@@ -133,14 +133,14 @@ export const createInvoice = async (req, res) => {
         igst:          totals.igst.toNumber(),
         taxAmount:     totals.taxAmount.toNumber(), 
         grandTotal:    totals.grandTotal.toNumber(),
-        balanceDue:    totals.grandTotal.toNumber(),
-        amountPaid:    0,
+        balanceDue:    totals.grandTotal.toNumber() - amountPaid,
+        amountPaid:    amountPaid,
         placeOfSupply: placeOfSupply || customerStateCode || null,
         paymentTerms,
         notes,
         linkedQuotationId:  linkedQuotationId || undefined,
         linkedSalesOrderId: linkedSalesOrderId || undefined,
-        status: 'Draft',
+        status: req.body.status || (amountPaid >= totals.grandTotal.toNumber() ? 'Paid' : (amountPaid > 0 ? 'Partially Paid' : 'Draft')),
         createdBy: req.user._id,
         taxType,
         taxRate,
@@ -267,6 +267,7 @@ export const createInvoice = async (req, res) => {
       shippingAddress,
       includeTerms,
       includeSignature,
+      amountPaid = 0,
     } = req.body;
 
     const customer = await Customer.findById(customerId);
@@ -354,8 +355,8 @@ export const createInvoice = async (req, res) => {
       taxAmount:   r(totalTax),   // FIX C2: always populate
       roundOff,
       grandTotal,
-      balanceDue:  grandTotal,
-      amountPaid:  0,
+      balanceDue:  grandTotal - amountPaid,
+      amountPaid:  amountPaid,
       notes,
       dueDate,
       billingAddress,

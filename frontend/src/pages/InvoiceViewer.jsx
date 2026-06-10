@@ -4,6 +4,7 @@ import axios from '../utils/api';
 import { API_URL } from '../utils/api';
 import { ArrowLeft, Download, Share2, Edit, Mail, Printer, Trash2, Palette, FileText, Copy, CreditCard, Send } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
+import ActionDropdown from '../components/ActionDropdown';
 
 export const getImageUrl = (url) => {
     if (!url) return '';
@@ -1411,18 +1412,21 @@ const InvoiceViewer = () => {
                     <button onClick={() => navigate(`/invoices/${invoice._id}/edit`)} className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm" title="Edit">
                         <Edit size={18} />
                     </button>
-                    <button onClick={handleDeleteInvoice} className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:text-red-600 hover:border-red-200 transition-all shadow-sm" title="Delete">
-                        <Trash2 size={18} />
-                    </button>
-                    <button onClick={() => window.print()} className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm" title="Print">
-                        <Printer size={18} />
-                    </button>
-                    <button onClick={handleCopyInvoiceLink} className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm" title="Copy Public Link">
-                        <Copy size={18} />
-                    </button>
-                    <button onClick={handleSendMailGmail} className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm" title="Send Gmail">
-                        <Mail size={18} />
-                    </button>
+
+                    <ActionDropdown>
+                        <button onClick={() => window.print()}>
+                            <Printer size={18} /> Print
+                        </button>
+                        <button onClick={handleSendMailGmail}>
+                            <Mail size={18} /> Email (Gmail)
+                        </button>
+                        <button onClick={handleCopyInvoiceLink}>
+                            <Copy size={18} /> Copy Link
+                        </button>
+                        <button onClick={handleDeleteInvoice} className="text-red-600">
+                            <Trash2 size={18} /> Delete
+                        </button>
+                    </ActionDropdown>
 
                     <button
                         onClick={handleDownloadPDF}

@@ -695,9 +695,12 @@ const InvoiceForm = () => {
             } else {
                 await axios.post('/api/invoices', payload);
             }
+            // Fix: Wait for state updates (isFormDirty = false) to apply before navigating
             setIsFormDirty(false);
             localStorage.removeItem('invoice_form_draft');
-            navigate('/invoices');
+            setTimeout(() => {
+                navigate('/invoices');
+            }, 100);
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to save invoice');
             setLoading(false);

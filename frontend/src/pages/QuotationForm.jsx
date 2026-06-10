@@ -417,11 +417,11 @@ const QuotationForm = () => {
                 res = await axios.post('/api/quotations', payload);
             }
             const newQuote = res.data?.data;
-            if (!isEdit && newQuote && window.confirm('Quotation saved successfully! Do you want to convert it to an Invoice?')) {
-                navigate(`/invoices/new?quoteId=${newQuote._id}`);
-            } else {
+            setIsFormDirty(false);
+            localStorage.removeItem('quotation_form_draft');
+            setTimeout(() => {
                 navigate('/quotations');
-            }
+            }, 100);
         } catch (err) {
             setError(err.response?.data?.message || `Failed to ${isEdit ? 'update' : 'create'} quotation`);
             setLoading(false);
