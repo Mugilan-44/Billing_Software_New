@@ -197,15 +197,28 @@ const CreditNoteViewer = () => {
                         </div>
                         <p className="text-slate-500 text-sm">{customer?.companyName || customer?.name}</p>
                     </div>
+
+                    <div className="flex items-center gap-2 ml-4">
+                        <button
+                            onClick={handleDownloadPDF}
+                            disabled={downloading}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 rounded-lg font-semibold text-xs shadow-sm transition-all disabled:opacity-70"
+                        >
+                            {downloading
+                                ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Downloading...</>
+                                : <><Download size={14} /> Download</>
+                            }
+                        </button>
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-2">
                     {cn.status === 'Open' && (
                         <>
-                            <button onClick={() => handleUpdateStatus('Refunded')} className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold text-xs shadow-sm transition-all" title="Record Refund">
+                            <button onClick={() => handleUpdateStatus('Refunded')} className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold text-xs shadow-sm transition-all" title="Record Refund">
                                 <Check size={14} /> Refund
                             </button>
-                            <button onClick={() => handleUpdateStatus('Applied')} className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold text-xs shadow-sm transition-all" title="Apply to Invoice">
+                            <button onClick={() => handleUpdateStatus('Applied')} className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold text-xs shadow-sm transition-all" title="Apply to Invoice">
                                 <Check size={14} /> Apply Credits
                             </button>
                         </>
@@ -223,22 +236,11 @@ const CreditNoteViewer = () => {
                         </button>
                     </ActionDropdown>
 
-                    <button
-                        onClick={handleDownloadPDF}
-                        disabled={downloading}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 rounded-xl font-semibold text-xs shadow-sm transition-all disabled:opacity-70"
-                    >
-                        {downloading
-                            ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Downloading...</>
-                            : <><Download size={14} /> Download</>
-                        }
-                    </button>
-
                     {/* Color picker */}
                     <div className="relative">
                         <button
                             onClick={() => setShowColors(v => !v)}
-                            className="p-1.5 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-slate-300 transition-all flex items-center gap-1.5"
+                            className="p-1.5 bg-white border border-slate-200 rounded-lg shadow-sm hover:border-slate-300 transition-all flex items-center gap-1.5"
                             title="Change Color Theme"
                         >
                             <div className="w-3.5 h-3.5 rounded-full border border-white shadow-sm" style={{ backgroundColor: accentColor }}></div>
@@ -263,7 +265,7 @@ const CreditNoteViewer = () => {
 
             {/* ── Credit Note Preview (Beautiful template) ── */}
             <div className="flex justify-center">
-                <div className="w-full max-w-4xl shadow-2xl bg-white p-10 rounded-xl border border-slate-200 font-sans" ref={printRef}>
+                <div className="w-full max-w-4xl shadow-2xl bg-white p-10 rounded-lg border border-slate-200 font-sans" ref={printRef}>
                     <div className="flex justify-between items-start pb-8 mb-8" style={{ borderBottom: `3px solid ${accentColor}` }}>
                         <div>
                             {settings?.logoUrl

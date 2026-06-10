@@ -149,7 +149,7 @@ const QuotationViewer = () => {
     const customer = quote.customerId;
 
     const TemplateModern = () => (
-        <div className="bg-white p-10 rounded-xl shadow-sm border border-slate-200 font-sans text-slate-800" ref={quoteRef}>
+        <div className="bg-white p-10 rounded-lg shadow-sm border border-slate-200 font-sans text-slate-800" ref={quoteRef}>
             <div className="flex justify-between items-start border-b border-slate-100 pb-8 mb-8">
                 <div>
                     {settings?.logoUrl ? (
@@ -284,33 +284,35 @@ const QuotationViewer = () => {
                         </div>
                         <p className="text-slate-500 text-sm font-medium">Customer: <span className="text-slate-900">{customer?.companyName}</span></p>
                     </div>
+
+                    <div className="flex items-center gap-2 ml-4">
+                        <button onClick={handleDownloadPDF} disabled={downloading} className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 rounded-lg font-semibold text-xs shadow-sm transition-all disabled:opacity-75">
+                            <Download size={14} /> {downloading ? 'Downloading...' : 'Download'}
+                        </button>
+
+                        <button onClick={() => navigate(`/quotations/${quote._id}/edit`)} className="p-1.5 bg-white border border-slate-300 rounded-lg text-slate-600 hover:text-[#2f62ff] hover:border-[#2f62ff] hover:bg-slate-50 transition-all shadow-sm" title="Edit Quotation">
+                            <Edit size={14} />
+                        </button>
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-2">
                     {(quote.status === 'Draft' || quote.status === 'Sent') && (
                         <>
-                            <button onClick={handleAccept} className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold text-xs shadow-sm transition-all">
+                            <button onClick={handleAccept} className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold text-xs shadow-sm transition-all">
                                 <Check size={14} /> Accept
                             </button>
-                            <button onClick={handleReject} className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 rounded-xl font-semibold text-xs shadow-sm transition-all">
+                            <button onClick={handleReject} className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 rounded-lg font-semibold text-xs shadow-sm transition-all">
                                 <X size={14} /> Reject
                             </button>
                         </>
                     )}
                     
                     {quote.status === 'Accepted' && (
-                        <button onClick={() => navigate(`/invoices/new?quoteId=${quote._id}`)} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2f62ff] hover:bg-[#1e50e2] text-white rounded-xl font-semibold text-xs shadow-sm transition-all">
+                        <button onClick={() => navigate(`/invoices/new?quoteId=${quote._id}`)} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2f62ff] hover:bg-[#1e50e2] text-white rounded-lg font-semibold text-xs shadow-sm transition-all">
                             <ClipboardList size={14} /> Convert to Invoice
                         </button>
                     )}
-
-                    <button onClick={handleDownloadPDF} disabled={downloading} className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 rounded-xl font-semibold text-xs shadow-sm transition-all disabled:opacity-75">
-                        <Download size={14} /> {downloading ? 'Downloading...' : 'Download'}
-                    </button>
-
-                    <button onClick={() => navigate(`/quotations/${quote._id}/edit`)} className="p-1.5 bg-white border border-slate-300 rounded-xl text-slate-600 hover:text-[#2f62ff] hover:border-[#2f62ff] hover:bg-slate-50 transition-all shadow-sm" title="Edit Quotation">
-                        <Edit size={14} />
-                    </button>
 
                     <ActionDropdown>
                         <button onClick={() => window.print()}>

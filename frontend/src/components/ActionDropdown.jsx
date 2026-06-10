@@ -19,15 +19,15 @@ export default function ActionDropdown({ children }) {
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm flex items-center gap-2"
+                className="p-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm flex items-center gap-1.5"
                 title="More Actions"
             >
-                <MoreVertical size={18} />
-                <span className="hidden sm:inline text-sm font-medium">Actions</span>
+                <MoreVertical size={14} />
+                <span className="hidden sm:inline text-xs font-semibold">Actions</span>
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-lg z-50 overflow-hidden py-1">
+                <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-lg shadow-lg z-50 overflow-hidden py-1">
                     {React.Children.map(children, child => {
                         if (React.isValidElement(child)) {
                             return React.cloneElement(child, {
