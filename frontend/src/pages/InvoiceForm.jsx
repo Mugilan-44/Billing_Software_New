@@ -622,6 +622,7 @@ const InvoiceForm = () => {
 
     const handleSubmit = async (e, actionType, bypassStock = false) => {
         e.preventDefault();
+        if (loading) return;
         if (!customerId) return setError('Please select a customer');
 
         // Check for negative stock
@@ -690,6 +691,8 @@ const InvoiceForm = () => {
         };
 
         try {
+            setLoading(true);
+            setError(null);
             if (isEdit) {
                 await axios.put(`/api/invoices/${id}`, payload);
             } else {

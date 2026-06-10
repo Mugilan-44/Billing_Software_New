@@ -73,6 +73,10 @@ export const createInvoice = async (req, res) => {
   // Try new schema first, fall back to legacy
   const parsed = createInvoiceSchema.safeParse(req.body);
 
+  if (!parsed.success) {
+    console.warn('[Zod Validation Warning] createInvoice validation failed. Errors:', parsed.error.errors);
+  }
+
   if (parsed.success) {
     // ── NEW: transactional path ───────────────────────────────────────────────
     const session = await mongoose.startSession();
@@ -122,8 +126,8 @@ export const createInvoice = async (req, res) => {
 
         const invoicePayload = {
           customerId,
-          date:    new Date(date),
-          dueDate: dueDate ? new Date(dueDate) : undefined,
+          date:    (date && (date instanceof Date || (typeof date === 'string' && date.trim() !== ''))) ? new Date(date) : new Date(),
+          dueDate: (dueDate && (dueDate instanceof Date || (typeof dueDate === 'string' && dueDate.trim() !== ''))) ? new Date(dueDate) : undefined,
           lineItems: totals.lineItems,
           subtotal:      totals.subtotal.toNumber(),
           subTotal:      totals.subtotal.toNumber(),  // legacy alias
@@ -716,6 +720,50 @@ export const updateInvoice = async (req, res) => {
     invoice.igst          = totals.igst.toNumber();
     invoice.taxAmount     = totals.taxAmount.toNumber();
     invoice.grandTotal    = totals.grandTotal.toNumber();
+
+    const oldAmountPaid = invoice.amountPaid || 0;
+    const newAmountPaid = req.body.amountPaid !== undefined ? (Number(req.body.amountPaid) || 0) : oldAmountPaid;
+
+    if (newAmountPaid !== oldAmountPaid) {
+      const diff = Math.round((newAmountPaid - oldAmountPaid) * 100) / 100;
+      invoice.amountPaid = newAmountPaid;
+      
+      if (diff > 0) {
+        const companyId = invoice.companyId || customer.companyId || req.user.companyId;
+        const branchId = invoice.branchId || customer.branchId || req.user.branchId;
+        const paymentNumber = await getNextSequenceValue('payment', 'PMT', companyId, session);
+        const payment = new Payment({
+          paymentNumber,
+          invoiceId: invoice._id,
+          customerId: invoice.customerId,
+          amount: diff,
+          date: invoice.date,
+          paymentDate: invoice.date,
+          mode: 'Cash',
+          paymentMode: 'Cash',
+          reference: `Payment adjustment for Invoice ${invoice.invoiceNumber}`,
+          notes: 'Auto-generated payment from invoice edit',
+          createdBy: req.user._id,
+          companyId,
+          branchId,
+        });
+        await payment.save({ session });
+
+        await LedgerEntry.create([{
+          companyId: req.user.companyId || null,
+          branchId:  req.user.branchId || null,
+          customerId: invoice.customerId,
+          type: 'Payment',
+          referenceId: payment._id,
+          description: `Payment Received (Ref: ${payment.paymentNumber})`,
+          credit: diff,
+          debit: 0,
+          date: invoice.date,
+          balance: 0,
+        }], { session });
+      }
+    }
+
     invoice.balanceDue    = Math.round((totals.grandTotal.toNumber() - (invoice.amountPaid || 0)) * 100) / 100;
     invoice.taxType       = taxType;
     invoice.taxRate       = taxRate;
@@ -727,8 +775,16 @@ export const updateInvoice = async (req, res) => {
     invoice.tdsAmount     = totals.tdsAmount.toNumber();
     invoice.tcsAmount     = totals.tcsAmount.toNumber();
     
-    if (date) invoice.date = new Date(date);
-    if (dueDate) invoice.dueDate = new Date(dueDate);
+    if (date && (date instanceof Date || (typeof date === 'string' && date.trim() !== ''))) {
+      invoice.date = new Date(date);
+    }
+    if (dueDate !== undefined) {
+      if (dueDate && (dueDate instanceof Date || (typeof dueDate === 'string' && dueDate.trim() !== ''))) {
+        invoice.dueDate = new Date(dueDate);
+      } else {
+        invoice.dueDate = undefined;
+      }
+    }
     if (notes !== undefined) invoice.notes = notes;
     if (paymentTerms !== undefined) invoice.paymentTerms = paymentTerms;
     if (transportDetails) invoice.transportDetails = transportDetails;

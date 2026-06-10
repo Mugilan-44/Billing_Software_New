@@ -66,9 +66,9 @@ export const createPurchaseBill = async (req, res) => {
         companyId: req.user.companyId || null,
         branchId:  req.user.branchId || null,
         billNumber, vendorId,
-        date:      new Date(date),
-        billDate:  new Date(date),
-        dueDate:   dueDate ? new Date(dueDate) : undefined,
+        date:      (date && (date instanceof Date || (typeof date === 'string' && date.trim() !== ''))) ? new Date(date) : new Date(),
+        billDate:  (date && (date instanceof Date || (typeof date === 'string' && date.trim() !== ''))) ? new Date(date) : new Date(),
+        dueDate:   (dueDate && (dueDate instanceof Date || (typeof dueDate === 'string' && dueDate.trim() !== ''))) ? new Date(dueDate) : undefined,
         lineItems: totals.lineItems,
         items:     totals.lineItems,
         subtotal, subTotal: subtotal,
@@ -529,11 +529,18 @@ export const updatePurchaseBill = async (req, res) => {
 
     // ── 5. Update Bill Fields ────────────────────────────────────────
     if (vendorId) bill.vendorId = vendorId;
-    if (date) {
-      bill.date = new Date(date);
-      bill.billDate = new Date(date);
+    if (date && (date instanceof Date || (typeof date === 'string' && date.trim() !== ''))) {
+      const parsedDate = new Date(date);
+      bill.date = parsedDate;
+      bill.billDate = parsedDate;
     }
-    if (dueDate) bill.dueDate = new Date(dueDate);
+    if (dueDate !== undefined) {
+      if (dueDate && (dueDate instanceof Date || (typeof dueDate === 'string' && dueDate.trim() !== ''))) {
+        bill.dueDate = new Date(dueDate);
+      } else {
+        bill.dueDate = undefined;
+      }
+    }
     bill.lineItems = totals.lineItems;
     bill.items = totals.lineItems;
     bill.subtotal = subtotal;
