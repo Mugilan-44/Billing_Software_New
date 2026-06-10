@@ -8,6 +8,7 @@ import QuickItemModal from '../components/QuickItemModal';
 import BulkItemModal from '../components/BulkItemModal';
 import UnsavedChangesWarning from '../components/UnsavedChangesWarning';
 import { AuthContext } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 const InputRow = ({ label, required, children, helper }) => (
     <div className="flex items-start py-3 border-b border-slate-100 last:border-0">
@@ -25,6 +26,7 @@ const InvoiceForm = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const isEdit = Boolean(id);
+    const { showToast } = useToast();
     const [searchParams] = useSearchParams();
     const quoteId = searchParams.get('quoteId');
 
@@ -638,6 +640,13 @@ const InvoiceForm = () => {
             return;
         }
 
+        const paidAmount = Number(amountPaid) || 0;
+        const grandTotalCalc = totals.grandTotal;
+        // Let backend determine status based on amountPaid, but allow draft override
+        const derivedStatus = actionType === 'draft'
+            ? 'Draft'
+            : (paidAmount >= grandTotalCalc && grandTotalCalc > 0 ? 'Paid' : (paidAmount > 0 ? 'Partially Paid' : 'Sent'));
+
         const payload = {
             customerId,
             invoiceNumber: isAutoNumber ? undefined : invoiceNumber,
@@ -646,7 +655,7 @@ const InvoiceForm = () => {
             dueDate,
             notes,
             termsAndConditions,
-            status: actionType === 'draft' ? 'Draft' : 'Sent',
+            status: derivedStatus,
             lineItems: items.filter(i => i.itemId).map(i => ({
                 itemId: i.itemId,
                 name: catalogItems.find(c => c._id === i.itemId)?.name || 'Item',
@@ -665,8 +674,8 @@ const InvoiceForm = () => {
                 rate: i.rate,
                 gstPercentage: isTaxed ? Number(i.taxGst || 0) : 0
             })),
-            amountPaid: Number(amountPaid) || 0,
-            balanceDue: Math.max(0, totals.grandTotal - (Number(amountPaid) || 0)),
+            amountPaid: paidAmount,
+            balanceDue: Math.max(0, grandTotalCalc - paidAmount),
             subTotal: totals.subTotal,
             taxTotal: { 
                 cgst: isTaxed && taxType === 'GST' ? totals.taxTotal / 2 : 0, 
@@ -674,7 +683,7 @@ const InvoiceForm = () => {
                 igst: isTaxed && taxType !== 'GST' ? totals.taxTotal : 0, 
                 totalTax: totals.taxTotal 
             },
-            grandTotal: totals.grandTotal,
+            grandTotal: grandTotalCalc,
             roundOff: 0,
             taxType: isTaxed ? taxType : 'None',
             isTaxed,
@@ -700,12 +709,12 @@ const InvoiceForm = () => {
             }
             setIsFormDirty(false);
             localStorage.removeItem('invoice_form_draft');
+            // Show success toast BEFORE navigating away
             showToast(`Invoice ${isEdit ? 'updated' : 'saved'} successfully!`, 'success');
-            setTimeout(() => {
-                navigate('/invoices');
-            }, 100);
+            navigate('/invoices');
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to save invoice');
+            const errMsg = err.response?.data?.message || err.message || 'Failed to save invoice';
+            setError(errMsg);
             setLoading(false);
         }
     };
