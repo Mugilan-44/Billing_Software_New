@@ -28,6 +28,7 @@ const ItemForm = () => {
         type: 'Goods',
         unit: 'pcs',
         sellingPrice: '',
+        purchasePrice: '',
         availableStock: 1,
         lowStockAlert: 5,
         description: ''
@@ -64,6 +65,7 @@ const ItemForm = () => {
                 sku: item.sku || '',
                 unit: item.unit || 'pcs',
                 sellingPrice: item.sellingPrice || '',
+                purchasePrice: item.purchasePrice || '',
                 availableStock: item.availableStock || item.stockQuantity || item.openingStock || 0,
                 description: item.description || ''
             });
@@ -97,6 +99,7 @@ const ItemForm = () => {
             ...form,
             openingStock: form.availableStock || 0,
             sellingPrice: Number(form.sellingPrice) || 0,
+            purchasePrice: Number(form.purchasePrice) || 0,
             lowStockAlert: Number(form.lowStockAlert) || 0
         };
 
@@ -240,6 +243,20 @@ const ItemForm = () => {
                                 value={form.sellingPrice}
                                 onChange={e => handleChange('sellingPrice', e.target.value === '' ? '' : Number(e.target.value))}
                                 required
+                            />
+                        </div>
+                    </InputRow>
+
+                    <InputRow label="Purchase Price (₹)">
+                        <div className="relative max-w-xs">
+                            <span className="absolute left-3 top-2 text-slate-400 text-sm">₹</span>
+                            <input
+                                type="number"
+                                step="0.01"
+                                className="input-field pl-8"
+                                value={form.purchasePrice}
+                                onChange={e => handleChange('purchasePrice', e.target.value === '' ? '' : Number(e.target.value))}
+                                placeholder="0.00"
                             />
                         </div>
                     </InputRow>

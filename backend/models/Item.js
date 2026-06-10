@@ -44,6 +44,10 @@ const itemSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  purchasePrice: {
+    type: Number,
+    default: 0,
+  },
   barcode: { type: String, trim: true },
   status: {
     type: String,
