@@ -120,7 +120,8 @@ invoiceSchema.pre('validate', async function () {
   }
   if (this.isNew && !this.invoiceNumber) {
     try {
-      this.invoiceNumber = await getNextCustomSequence(this.companyId, 'invoice', this.taxMode || 'WITH_TAX');
+      const session = this.$session();
+      this.invoiceNumber = await getNextCustomSequence(this.companyId, 'invoice', this.taxMode || 'WITH_TAX', session);
     } catch (err) {
       throw new Error(`Failed to generate atomic sequential invoice ID: ${err.message}`);
     }

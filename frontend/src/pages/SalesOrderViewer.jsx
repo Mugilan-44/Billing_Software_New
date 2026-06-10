@@ -107,40 +107,40 @@ const SalesOrderViewer = () => {
                         <ArrowLeft size={20} />
                     </button>
                     <div>
-                        <div className="flex items-center flex-wrap gap-3 mb-1">
+                        <div className="flex items-center gap-3 mb-1">
                             <h1 className="text-3xl font-black text-slate-900 tracking-tight">{order.orderNumber}</h1>
                             <span className={`text-[10px] px-2.5 py-1 rounded-full font-black tracking-widest uppercase shadow-sm ${order.status === 'Confirmed' ? 'bg-emerald-500 text-white' : order.status === 'Cancelled' ? 'bg-rose-500 text-white' : 'bg-blue-500 text-white'}`}>
                                 {order.status}
                             </span>
-
-                            <div className="flex items-center gap-2 ml-2">
-                                <button onClick={() => navigate(`/orders/${order._id}/edit`)} className="p-1.5 bg-white border border-slate-300 rounded-xl text-slate-600 hover:text-[#2f62ff] hover:border-[#2f62ff] hover:bg-slate-50 transition-all shadow-sm" title="Edit Sales Order">
-                                    <Edit size={14} />
-                                </button>
-
-                                <ActionDropdown>
-                                    <button onClick={() => window.print()}>
-                                        <Printer size={16} /> Print Order
-                                    </button>
-                                    <button onClick={handleSendEmail}>
-                                        <Mail size={16} /> Email Order
-                                    </button>
-                                    <button onClick={handleDeleteOrder} className="text-red-600">
-                                        <Trash2 size={16} /> Delete Order
-                                    </button>
-                                </ActionDropdown>
-
-                                <button onClick={handleDownloadPDF} disabled={downloading} className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 rounded-xl font-semibold text-xs shadow-sm transition-all disabled:opacity-75">
-                                    {downloading ? (
-                                        <><div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" /> Downloading...</>
-                                    ) : (
-                                        <><Download size={14} /> Download</>
-                                    )}
-                                </button>
-                            </div>
                         </div>
                         <p className="text-slate-500 text-sm font-medium">Customer: <span className="text-slate-900">{customer?.companyName}</span></p>
                     </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <button onClick={() => navigate(`/orders/${order._id}/edit`)} className="p-1.5 bg-white border border-slate-300 rounded-xl text-slate-600 hover:text-[#2f62ff] hover:border-[#2f62ff] hover:bg-slate-50 transition-all shadow-sm" title="Edit Sales Order">
+                        <Edit size={14} />
+                    </button>
+
+                    <ActionDropdown>
+                        <button onClick={() => window.print()}>
+                            <Printer size={16} /> Print Order
+                        </button>
+                        <button onClick={handleSendEmail}>
+                            <Mail size={16} /> Email Order
+                        </button>
+                        <button onClick={handleDeleteOrder} className="text-red-600">
+                            <Trash2 size={16} /> Delete Order
+                        </button>
+                    </ActionDropdown>
+
+                    <button onClick={handleDownloadPDF} disabled={downloading} className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 rounded-xl font-semibold text-xs shadow-sm transition-all disabled:opacity-75">
+                        {downloading ? (
+                            <><div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" /> Downloading...</>
+                        ) : (
+                            <><Download size={14} /> Download</>
+                        )}
+                    </button>
                 </div>
             </div>
 

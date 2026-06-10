@@ -92,7 +92,8 @@ quotationSchema.index({ companyId: 1, quoteNumber: 1 }, { unique: true });
 quotationSchema.pre('validate', async function () {
   if (this.isNew && !this.quoteNumber) {
     try {
-      this.quoteNumber = await getNextCustomSequence(this.companyId, 'quotation', this.taxMode || 'WITH_TAX');
+      const session = this.$session();
+      this.quoteNumber = await getNextCustomSequence(this.companyId, 'quotation', this.taxMode || 'WITH_TAX', session);
     } catch (err) {
       throw new Error(`Failed to generate atomic sequential quotation ID: ${err.message}`);
     }

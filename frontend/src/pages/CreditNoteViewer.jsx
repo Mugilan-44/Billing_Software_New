@@ -184,7 +184,7 @@ const CreditNoteViewer = () => {
                         <ArrowLeft size={20} />
                     </button>
                     <div>
-                        <div className="flex items-center flex-wrap gap-3 mb-1">
+                        <div className="flex items-center gap-3 mb-1">
                             <h1 className="text-2xl font-black text-slate-900">#{cn.cnNumber}</h1>
                             <span className={`text-[10px] px-2.5 py-1 rounded-full font-black tracking-widest uppercase ${
                                 cn.status === 'Open' ? 'bg-blue-500 text-white' :
@@ -194,69 +194,69 @@ const CreditNoteViewer = () => {
                             }`}>
                                 {cn.status || 'Open'}
                             </span>
-
-                            <div className="flex items-center gap-2 ml-2">
-                                {cn.status === 'Open' && (
-                                    <>
-                                        <button onClick={() => handleUpdateStatus('Refunded')} className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold text-xs shadow-sm transition-all" title="Record Refund">
-                                            <Check size={14} /> Refund
-                                        </button>
-                                        <button onClick={() => handleUpdateStatus('Applied')} className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold text-xs shadow-sm transition-all" title="Apply to Invoice">
-                                            <Check size={14} /> Apply Credits
-                                        </button>
-                                    </>
-                                )}
-
-                                <ActionDropdown>
-                                    <button onClick={() => window.print()}>
-                                        <Printer size={16} /> Print Note
-                                    </button>
-                                    <button onClick={handleCopyDetails}>
-                                        <Copy size={16} /> Copy Details
-                                    </button>
-                                    <button onClick={openEmailModal}>
-                                        <Mail size={16} /> Send Email
-                                    </button>
-                                </ActionDropdown>
-
-                                <button
-                                    onClick={handleDownloadPDF}
-                                    disabled={downloading}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 rounded-xl font-semibold text-xs shadow-sm transition-all disabled:opacity-70"
-                                >
-                                    {downloading
-                                        ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Downloading...</>
-                                        : <><Download size={14} /> Download</>
-                                    }
-                                </button>
-
-                                {/* Color picker */}
-                                <div className="relative">
-                                    <button
-                                        onClick={() => setShowColors(v => !v)}
-                                        className="p-1.5 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-slate-300 transition-all flex items-center gap-1.5"
-                                        title="Change Color Theme"
-                                    >
-                                        <div className="w-3.5 h-3.5 rounded-full border border-white shadow-sm" style={{ backgroundColor: accentColor }}></div>
-                                        <Palette size={14} className="text-slate-500" />
-                                    </button>
-                                    {showColors && (
-                                        <div className="absolute left-0 top-9 bg-white border border-slate-200 rounded-lg shadow-xl p-2.5 z-50 flex gap-1.5">
-                                            {COLOR_THEMES.map(t => (
-                                                <button
-                                                    key={t.value}
-                                                    onClick={() => handleColorChange(t.value)}
-                                                    title={t.label}
-                                                    className={`w-6.5 h-6.5 rounded-full border-2 transition-all hover:scale-110 ${accentColor === t.value ? 'border-slate-800 scale-110' : 'border-white shadow-sm'}`}
-                                                    style={{ backgroundColor: t.value }}
-                                                />
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
                         </div>
                         <p className="text-slate-500 text-sm">{customer?.companyName || customer?.name}</p>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    {cn.status === 'Open' && (
+                        <>
+                            <button onClick={() => handleUpdateStatus('Refunded')} className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold text-xs shadow-sm transition-all" title="Record Refund">
+                                <Check size={14} /> Refund
+                            </button>
+                            <button onClick={() => handleUpdateStatus('Applied')} className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold text-xs shadow-sm transition-all" title="Apply to Invoice">
+                                <Check size={14} /> Apply Credits
+                            </button>
+                        </>
+                    )}
+
+                    <ActionDropdown>
+                        <button onClick={() => window.print()}>
+                            <Printer size={16} /> Print Note
+                        </button>
+                        <button onClick={handleCopyDetails}>
+                            <Copy size={16} /> Copy Details
+                        </button>
+                        <button onClick={openEmailModal}>
+                            <Mail size={16} /> Send Email
+                        </button>
+                    </ActionDropdown>
+
+                    <button
+                        onClick={handleDownloadPDF}
+                        disabled={downloading}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 rounded-xl font-semibold text-xs shadow-sm transition-all disabled:opacity-70"
+                    >
+                        {downloading
+                            ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Downloading...</>
+                            : <><Download size={14} /> Download</>
+                        }
+                    </button>
+
+                    {/* Color picker */}
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowColors(v => !v)}
+                            className="p-1.5 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-slate-300 transition-all flex items-center gap-1.5"
+                            title="Change Color Theme"
+                        >
+                            <div className="w-3.5 h-3.5 rounded-full border border-white shadow-sm" style={{ backgroundColor: accentColor }}></div>
+                            <Palette size={14} className="text-slate-500" />
+                        </button>
+                        {showColors && (
+                            <div className="absolute left-0 top-9 bg-white border border-slate-200 rounded-lg shadow-xl p-2.5 z-50 flex gap-1.5">
+                                {COLOR_THEMES.map(t => (
+                                    <button
+                                        key={t.value}
+                                        onClick={() => handleColorChange(t.value)}
+                                        title={t.label}
+                                        className={`w-6.5 h-6.5 rounded-full border-2 transition-all hover:scale-110 ${accentColor === t.value ? 'border-slate-800 scale-110' : 'border-white shadow-sm'}`}
+                                        style={{ backgroundColor: t.value }}
+                                    />
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

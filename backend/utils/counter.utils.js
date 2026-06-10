@@ -16,7 +16,7 @@ const CUSTOM_MODEL_MAPPING = {
   creditNote: { modelName: 'CreditNote', field: 'cnNumber' }
 };
 
-export async function getNextSequenceValue(sequenceName, prefix, companyId) {
+export async function getNextSequenceValue(sequenceName, prefix, companyId, session = null) {
   const query = companyId ? { id: `${sequenceName}_${companyId}` } : { id: sequenceName };
   const mapping = MODEL_MAPPING[sequenceName];
 
@@ -27,10 +27,12 @@ export async function getNextSequenceValue(sequenceName, prefix, companyId) {
       const counter = await Counter.findOneAndUpdate(
         query,
         { $inc: { seq: 1 } },
-        { new: true, upsert: true }
+        { new: true, upsert: true, session }
       );
       const generatedNumber = `${prefix}-${String(counter.seq).padStart(6, '0')}`;
-      const exists = await Model.exists({ companyId: companyId || null, [field]: generatedNumber });
+      let queryExists = Model.findOne({ companyId: companyId || null, [field]: generatedNumber }).select('_id');
+      if (session) queryExists = queryExists.session(session);
+      const exists = await queryExists.lean();
       if (!exists) {
         return generatedNumber;
       }
@@ -41,13 +43,15 @@ export async function getNextSequenceValue(sequenceName, prefix, companyId) {
   const counter = await Counter.findOneAndUpdate(
     query,
     { $inc: { seq: 1 } },
-    { new: true, upsert: true }
+    { new: true, upsert: true, session }
   );
   return `${prefix}-${String(counter.seq).padStart(6, '0')}`;
 }
 
-export async function getNextCustomSequence(companyId, type, taxMode) {
-  let settings = await CompanySettings.findOne({ companyId });
+export async function getNextCustomSequence(companyId, type, taxMode, session = null) {
+  let settingsQuery = CompanySettings.findOne({ companyId });
+  if (session) settingsQuery = settingsQuery.session(session);
+  let settings = await settingsQuery;
   if (!settings) {
     const defaultPrefix = type === 'invoice' ? 'INV' : type === 'challan' ? 'CHL' : type.slice(0, 3).toUpperCase();
     const modeSuffix = taxMode === 'WITHOUT_TAX' ? 'NT' : 'WT';
@@ -64,7 +68,7 @@ export async function getNextCustomSequence(companyId, type, taxMode) {
       withTax: { auto: true, prefix: `${defaultPref}-WT-`, nextNumber: 1, digits: 4 },
       withoutTax: { auto: true, prefix: `${defaultPref}-NT-`, nextNumber: 1, digits: 4 }
     };
-    await settings.save();
+    await settings.save(session ? { session } : {});
   }
 
   const config = settings.numberingSettings[type][modeKey];
@@ -79,14 +83,16 @@ export async function getNextCustomSequence(companyId, type, taxMode) {
       const updatedSettings = await CompanySettings.findOneAndUpdate(
         { companyId },
         { $inc: { [updateKey]: 1 } },
-        { new: false }
+        { new: false, session }
       );
       const currentNum = updatedSettings.numberingSettings[type][modeKey].nextNumber;
       const prefix = config.prefix || '';
       const digits = config.digits || 4;
       const generatedNumber = `${prefix}${String(currentNum).padStart(digits, '0')}`;
 
-      const exists = await Model.exists({ companyId: companyId || null, [field]: generatedNumber });
+      let queryExists = Model.findOne({ companyId: companyId || null, [field]: generatedNumber }).select('_id');
+      if (session) queryExists = queryExists.session(session);
+      const exists = await queryExists.lean();
       if (!exists) {
         return generatedNumber;
       }
@@ -97,7 +103,7 @@ export async function getNextCustomSequence(companyId, type, taxMode) {
   const updatedSettings = await CompanySettings.findOneAndUpdate(
     { companyId },
     { $inc: { [updateKey]: 1 } },
-    { new: false }
+    { new: false, session }
   );
   const currentNum = updatedSettings.numberingSettings[type][modeKey].nextNumber;
   const prefix = config.prefix || '';

@@ -192,7 +192,7 @@ export const createInvoice = async (req, res) => {
       if (amountPaid > 0) {
         const companyId = invoice.companyId || customer.companyId || req.user.companyId;
         const branchId = invoice.branchId || customer.branchId || req.user.branchId;
-        const paymentNumber = await getNextSequenceValue('payment', 'PMT', companyId);
+        const paymentNumber = await getNextSequenceValue('payment', 'PMT', companyId, session);
         const payment = new Payment({
           paymentNumber,
           invoiceId: invoice._id,
