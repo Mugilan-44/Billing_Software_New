@@ -1428,16 +1428,16 @@ const InvoiceViewer = () => {
                                 <button
                                     onClick={handleDownloadPDF}
                                     disabled={downloading}
-                                    className="flex items-center gap-1 px-2 py-1 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 rounded-md font-semibold text-[11px] shadow-sm transition-all disabled:opacity-75"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 rounded-lg font-semibold text-xs shadow-sm transition-all disabled:opacity-75"
                                 >
                                     {downloading
-                                        ? <><div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" /> Downloading...</>
-                                        : <><Download size={12} /> Download</>
+                                        ? <><div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" /> Downloading...</>
+                                        : <><Download size={14} /> Download</>
                                     }
                                 </button>
                                 
-                                <button onClick={() => navigate(`/invoices/${invoice._id}/edit`)} className="flex items-center gap-1 px-2 py-1 bg-white border border-slate-300 rounded-md text-slate-600 hover:text-[#2f62ff] hover:border-[#2f62ff] hover:bg-slate-50 transition-all shadow-sm font-semibold text-[11px]" title="Edit">
-                                    <Edit size={12} /> Edit
+                                <button onClick={() => navigate(`/invoices/${invoice._id}/edit`)} className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-700 hover:text-blue-600 hover:border-blue-300 hover:bg-slate-50 transition-all shadow-sm font-semibold text-xs" title="Edit">
+                                    <Edit size={14} /> Edit
                                 </button>
                             </div>
                         </div>

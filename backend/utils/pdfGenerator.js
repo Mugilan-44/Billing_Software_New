@@ -811,6 +811,8 @@ export const generateInvoicePDF = async (invoice, customer, items, settings, tem
         sgst: invoice.sgst,
         igst: invoice.igst,
         grandTotal: invoice.grandTotal,
+        amountPaid: invoice.amountPaid || 0,
+        balanceDue: invoice.balanceDue || 0,
         notes: invoice.notes,
         termsAndConditions: invoice.termsAndConditions,
         includeTerms: invoice.includeTerms,

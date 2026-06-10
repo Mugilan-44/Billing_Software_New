@@ -19,7 +19,7 @@ export default function ActionDropdown({ children }) {
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="p-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm flex items-center gap-1.5"
+                className="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-700 hover:text-blue-600 hover:border-blue-300 hover:bg-slate-50 transition-all shadow-sm flex items-center gap-1.5"
                 title="More Actions"
             >
                 <MoreVertical size={14} />
