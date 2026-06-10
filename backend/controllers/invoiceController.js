@@ -76,206 +76,207 @@ export const createInvoice = async (req, res) => {
   if (parsed.success) {
     // ── NEW: transactional path ───────────────────────────────────────────────
     const session = await mongoose.startSession();
-    session.startTransaction();
+    let createdInvoice = null;
 
     try {
-      const { customerId, lineItems, date, dueDate, notes, paymentTerms,
-              linkedQuotationId, linkedSalesOrderId,
-              invoiceDiscount = 0, placeOfSupply,
-              taxType = 'GST', taxRate, isTaxed = true,
-              useProductSpecificTax = true,
-              tdsTcsType = 'None', tdsPercentage = 0, tcsPercentage = 0,
-              includeTerms = true, includeSignature = false,
-              billingAddress, shippingAddress, amountPaid = 0 } = parsed.data;
+      await session.withTransaction(async () => {
+        const { customerId, lineItems, date, dueDate, notes, paymentTerms,
+                linkedQuotationId, linkedSalesOrderId,
+                invoiceDiscount = 0, placeOfSupply,
+                taxType = 'GST', taxRate, isTaxed = true,
+                useProductSpecificTax = true,
+                tdsTcsType = 'None', tdsPercentage = 0, tcsPercentage = 0,
+                includeTerms = true, includeSignature = false,
+                billingAddress, shippingAddress, amountPaid = 0 } = parsed.data;
 
-      const customer = await Customer.findById(customerId).session(session);
-      if (!customer) throw new Error('Customer not found');
+        const customer = await Customer.findById(customerId).session(session);
+        if (!customer) throw new Error('Customer not found');
 
-      // Scope CompanySettings to this company
-      const companySettingsQuery = req.user.companyId
-        ? { companyId: req.user.companyId }
-        : {};
-      const companySettings = await CompanySettings.findOne(companySettingsQuery).lean().session(session);
+        // Scope CompanySettings to this company
+        const companySettingsQuery = req.user.companyId
+          ? { companyId: req.user.companyId }
+          : {};
+        const companySettings = await CompanySettings.findOne(companySettingsQuery).lean().session(session);
 
-      const companyStateCode  = companySettings?.stateCode
-        || (companySettings?.gstin || companySettings?.gstNumber || '').substring(0, 2)
-        || null;
-      const customerStateCode = customer.stateCode
-        || (customer.gstin || customer.gstNumber || '').substring(0, 2)
-        || null;
+        const companyStateCode  = companySettings?.stateCode
+          || (companySettings?.gstin || companySettings?.gstNumber || '').substring(0, 2)
+          || null;
+        const customerStateCode = customer.stateCode
+          || (customer.gstin || customer.gstNumber || '').substring(0, 2)
+          || null;
 
-      const totals = calculateInvoice({
-        lineItems,
-        discountPercent: 0,
-        discountFixed: invoiceDiscount,
-        companyStateCode,
-        customerStateCode,
-        taxType,
-        taxRate,
-        isTaxed,
-        useProductSpecificTax,
-        tdsTcsType,
-        tdsPercentage,
-        tcsPercentage
-      });
-
-      const invoicePayload = {
-        customerId,
-        date:    new Date(date),
-        dueDate: dueDate ? new Date(dueDate) : undefined,
-        lineItems: totals.lineItems,
-        subtotal:      totals.subtotal.toNumber(),
-        subTotal:      totals.subtotal.toNumber(),  // legacy alias
-        taxableAmount: totals.taxableAmount.toNumber(),
-        discountAmount: totals.discountAmount.toNumber(),
-        discount:      totals.discountAmount.toNumber(),  // legacy alias
-        cgst:          totals.cgst.toNumber(),
-        sgst:          totals.sgst.toNumber(),
-        igst:          totals.igst.toNumber(),
-        taxAmount:     totals.taxAmount.toNumber(), 
-        grandTotal:    totals.grandTotal.toNumber(),
-        balanceDue:    totals.grandTotal.toNumber() - amountPaid,
-        amountPaid:    amountPaid,
-        placeOfSupply: placeOfSupply || customerStateCode || null,
-        paymentTerms,
-        notes,
-        linkedQuotationId:  linkedQuotationId || undefined,
-        linkedSalesOrderId: linkedSalesOrderId || undefined,
-        status: req.body.status || (amountPaid >= totals.grandTotal.toNumber() ? 'Paid' : (amountPaid > 0 ? 'Partially Paid' : 'Draft')),
-        createdBy: req.user._id,
-        taxType,
-        taxRate,
-        isTaxed,
-        useProductSpecificTax,
-        tdsTcsType,
-        tdsPercentage: Number(tdsPercentage) || 0,
-        tdsAmount: totals.tdsAmount.toNumber(),
-        tcsPercentage: Number(tcsPercentage) || 0,
-        tcsAmount: totals.tcsAmount.toNumber(),
-        includeTerms,
-        includeSignature,
-        billingAddress,
-        shippingAddress,
-        taxMode: req.body.taxMode || 'WITH_TAX',
-        invoiceNumber: req.body.invoiceNumber || undefined
-      };
-
-      invoicePayload.companyId = customer.companyId || req.user.companyId || null;
-      invoicePayload.branchId  = customer.branchId || req.user.branchId || null;
-
-      const invoice = new Invoice(invoicePayload);
-      await invoice.save({ session });
-
-      // Audit Log for precise calculation
-      await CalculationLog.create([{
-        invoiceId: invoice._id,
-        stepName: 'INITIAL_CREATION',
-        inputValues: { lineItems, invoiceDiscount, companyStateCode, customerStateCode },
-        calculatedValue: totals,
-        userId: req.user._id
-      }], { session });
-
-      // FIX C8: Write LedgerEntry in transactional path
-      await LedgerEntry.create([{
-        companyId:   req.user.companyId || null,
-        branchId:    req.user.branchId  || null,
-        customerId,
-        date:        invoice.date,
-        type:        'Invoice',
-        referenceId: invoice._id,
-        description: `Invoice ${invoice.invoiceNumber}`,
-        debit:       totals.grandTotal.toNumber(),
-        credit:      0,
-        balance:     roundTo(customer.outstandingBalance + totals.grandTotal.toNumber()),
-      }], { session });
-
-      if (amountPaid > 0) {
-        const companyId = invoice.companyId || customer.companyId || req.user.companyId;
-        const branchId = invoice.branchId || customer.branchId || req.user.branchId;
-        const paymentNumber = await getNextSequenceValue('payment', 'PMT', companyId, session);
-        const payment = new Payment({
-          paymentNumber,
-          invoiceId: invoice._id,
-          customerId: invoice.customerId,
-          amount: amountPaid,
-          date: invoice.date,
-          paymentDate: invoice.date,
-          mode: 'Cash',
-          paymentMode: 'Cash',
-          reference: `Advance payment for Invoice ${invoice.invoiceNumber}`,
-          notes: 'Auto-generated payment from invoice creation',
-          createdBy: req.user._id,
-          companyId,
-          branchId,
+        const totals = calculateInvoice({
+          lineItems,
+          discountPercent: 0,
+          discountFixed: invoiceDiscount,
+          companyStateCode,
+          customerStateCode,
+          taxType,
+          taxRate,
+          isTaxed,
+          useProductSpecificTax,
+          tdsTcsType,
+          tdsPercentage,
+          tcsPercentage
         });
-        await payment.save({ session });
 
-        await LedgerEntry.create([{
-          companyId: req.user.companyId || null,
-          branchId:  req.user.branchId || null,
-          customerId: invoice.customerId,
-          type: 'Payment',
-          referenceId: payment._id,
-          description: `Payment Received (Ref: ${payment.paymentNumber})`,
-          credit: amountPaid,
-          debit: 0,
-          date: invoice.date,
-          balance: 0,
+        const invoicePayload = {
+          customerId,
+          date:    new Date(date),
+          dueDate: dueDate ? new Date(dueDate) : undefined,
+          lineItems: totals.lineItems,
+          subtotal:      totals.subtotal.toNumber(),
+          subTotal:      totals.subtotal.toNumber(),  // legacy alias
+          taxableAmount: totals.taxableAmount.toNumber(),
+          discountAmount: totals.discountAmount.toNumber(),
+          discount:      totals.discountAmount.toNumber(),  // legacy alias
+          cgst:          totals.cgst.toNumber(),
+          sgst:          totals.sgst.toNumber(),
+          igst:          totals.igst.toNumber(),
+          taxAmount:     totals.taxAmount.toNumber(), 
+          grandTotal:    totals.grandTotal.toNumber(),
+          balanceDue:    totals.grandTotal.toNumber() - amountPaid,
+          amountPaid:    amountPaid,
+          placeOfSupply: placeOfSupply || customerStateCode || null,
+          paymentTerms,
+          notes,
+          linkedQuotationId:  linkedQuotationId || undefined,
+          linkedSalesOrderId: linkedSalesOrderId || undefined,
+          status: req.body.status || (amountPaid >= totals.grandTotal.toNumber() ? 'Paid' : (amountPaid > 0 ? 'Partially Paid' : 'Draft')),
+          createdBy: req.user._id,
+          taxType,
+          taxRate,
+          isTaxed,
+          useProductSpecificTax,
+          tdsTcsType,
+          tdsPercentage: Number(tdsPercentage) || 0,
+          tdsAmount: totals.tdsAmount.toNumber(),
+          tcsPercentage: Number(tcsPercentage) || 0,
+          tcsAmount: totals.tcsAmount.toNumber(),
+          includeTerms,
+          includeSignature,
+          billingAddress,
+          shippingAddress,
+          taxMode: req.body.taxMode || 'WITH_TAX',
+          invoiceNumber: req.body.invoiceNumber || undefined
+        };
+
+        invoicePayload.companyId = customer.companyId || req.user.companyId || null;
+        invoicePayload.branchId  = customer.branchId || req.user.branchId || null;
+
+        const invoice = new Invoice(invoicePayload);
+        await invoice.save({ session });
+        createdInvoice = invoice;
+
+        // Audit Log for precise calculation
+        await CalculationLog.create([{
+          invoiceId: invoice._id,
+          stepName: 'INITIAL_CREATION',
+          inputValues: { lineItems, invoiceDiscount, companyStateCode, customerStateCode },
+          calculatedValue: totals,
+          userId: req.user._id
         }], { session });
-      }
 
-      // Recalculate customer balances and ledger running balances safely
-      await recalculateCustomerLedger(customerId, session);
+        // FIX C8: Write LedgerEntry in transactional path
+        await LedgerEntry.create([{
+          companyId:   req.user.companyId || null,
+          branchId:    req.user.branchId  || null,
+          customerId,
+          date:        invoice.date,
+          type:        'Invoice',
+          referenceId: invoice._id,
+          description: `Invoice ${invoice.invoiceNumber}`,
+          debit:       totals.grandTotal.toNumber(),
+          credit:      0,
+          balance:     roundTo(customer.outstandingBalance + totals.grandTotal.toNumber()),
+        }], { session });
 
-      // FIX C9: Write StockHistory for every stock OUT in transactional path
-      for (const item of lineItems) {
-        if (item.itemId) {
-          const stock = await Item.findById(item.itemId).session(session);
-          if (stock && (stock.trackStock !== false) && stock.type !== 'Service') {
-            const available = stock.availableStock ?? stock.stockQuantity ?? 0;
-            // Allow negative stock natively
-            const newStock = roundTo(available - item.quantity);
-            stock.availableStock = newStock;
-            stock.stockQuantity  = newStock;
-            await stock.save({ session });
+        if (amountPaid > 0) {
+          const companyId = invoice.companyId || customer.companyId || req.user.companyId;
+          const branchId = invoice.branchId || customer.branchId || req.user.branchId;
+          const paymentNumber = await getNextSequenceValue('payment', 'PMT', companyId, session);
+          const payment = new Payment({
+            paymentNumber,
+            invoiceId: invoice._id,
+            customerId: invoice.customerId,
+            amount: amountPaid,
+            date: invoice.date,
+            paymentDate: invoice.date,
+            mode: 'Cash',
+            paymentMode: 'Cash',
+            reference: `Advance payment for Invoice ${invoice.invoiceNumber}`,
+            notes: 'Auto-generated payment from invoice creation',
+            createdBy: req.user._id,
+            companyId,
+            branchId,
+          });
+          await payment.save({ session });
 
-            await StockHistory.create([{
-              companyId:     req.user.companyId || null,
-              branchId:      req.user.branchId  || null,
-              itemId:        stock._id,
-              action:        'OUT',
-              quantity:      item.quantity,
-              previousStock: available,
-              currentStock:  newStock,
-              referenceId:   invoice._id,
-              referenceType: 'Invoice',
-              notes:         `Invoice ${invoice.invoiceNumber}`,
-            }], { session });
+          await LedgerEntry.create([{
+            companyId: req.user.companyId || null,
+            branchId:  req.user.branchId || null,
+            customerId: invoice.customerId,
+            type: 'Payment',
+            referenceId: payment._id,
+            description: `Payment Received (Ref: ${payment.paymentNumber})`,
+            credit: amountPaid,
+            debit: 0,
+            date: invoice.date,
+            balance: 0,
+          }], { session });
+        }
+
+        // Recalculate customer balances and ledger running balances safely
+        await recalculateCustomerLedger(customerId, session);
+
+        // FIX C9: Write StockHistory for every stock OUT in transactional path
+        for (const item of lineItems) {
+          if (item.itemId) {
+            const stock = await Item.findById(item.itemId).session(session);
+            if (stock && (stock.trackStock !== false) && stock.type !== 'Service') {
+              const available = stock.availableStock ?? stock.stockQuantity ?? 0;
+              // Allow negative stock natively
+              const newStock = roundTo(available - item.quantity);
+              stock.availableStock = newStock;
+              stock.stockQuantity  = newStock;
+              await stock.save({ session });
+
+              await StockHistory.create([{
+                companyId:     req.user.companyId || null,
+                branchId:      req.user.branchId  || null,
+                itemId:        stock._id,
+                action:        'OUT',
+                quantity:      item.quantity,
+                previousStock: available,
+                currentStock:  newStock,
+                referenceId:   invoice._id,
+                referenceType: 'Invoice',
+                notes:         `Invoice ${invoice.invoiceNumber}`,
+              }], { session });
+            }
           }
         }
-      }
 
-      // Update linked documents
-      if (linkedQuotationId) {
-        await Quotation.findByIdAndUpdate(linkedQuotationId,
-          { status: 'Converted', convertedToOrderId: invoice._id }, { session });
-      }
-      if (linkedSalesOrderId) {
-        await SalesOrder.findByIdAndUpdate(linkedSalesOrderId,
-          { status: 'Invoiced', convertedToInvoiceId: invoice._id }, { session });
-      }
+        // Update linked documents
+        if (linkedQuotationId) {
+          await Quotation.findByIdAndUpdate(linkedQuotationId,
+            { status: 'Converted', convertedToOrderId: invoice._id }, { session });
+        }
+        if (linkedSalesOrderId) {
+          await SalesOrder.findByIdAndUpdate(linkedSalesOrderId,
+            { status: 'Invoiced', convertedToInvoiceId: invoice._id }, { session });
+        }
 
-      await AuditLog.create([{
-        module: 'Invoice', action: 'CREATE',
-        documentId: invoice._id, userId: req.user._id,
-        changes: { after: invoice.toObject() },
-      }], { session });
+        await AuditLog.create([{
+          module: 'Invoice', action: 'CREATE',
+          documentId: invoice._id, userId: req.user._id,
+          changes: { after: invoice.toObject() },
+        }], { session });
+      });
 
-      await session.commitTransaction();
-      return res.status(201).json({ success: true, data: invoice });
+      return res.status(201).json({ success: true, data: createdInvoice });
 
     } catch (err) {
-      await session.abortTransaction();
       if (err.code === 11000) {
         return res.status(400).json({ success: false, message: 'This Invoice Number already exists. Please choose a unique one.' });
       }
