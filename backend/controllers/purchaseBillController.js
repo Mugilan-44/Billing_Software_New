@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
 import PurchaseBill from '../models/PurchaseBill.js';
+import PurchasePayment from '../models/PurchasePayment.js';
 import Vendor from '../models/Vendor.js';
 import Item from '../models/Item.js';
 import StockHistory from '../models/StockHistory.js';
@@ -267,6 +268,35 @@ export const payPurchaseBill = async (req, res) => {
         { $inc: { outstandingBalance: -payAmount } },
         { session }
       );
+
+      const paymentNumber = await getNextCustomSequence(req.user.companyId, 'payment', bill.taxMode || 'WITH_TAX');
+
+      const payment = await PurchasePayment.create([{
+        companyId: req.user.companyId || null,
+        branchId: req.user.branchId || null,
+        paymentNumber,
+        purchaseBillId: bill._id,
+        vendorId: bill.vendorId,
+        amount: payAmount,
+        date: (date && (date instanceof Date || (typeof date === 'string' && date.trim() !== ''))) ? new Date(date) : new Date(),
+        mode: mode || 'Bank',
+        reference: reference || '',
+        notes: `Payment for Purchase Bill ${bill.billNumber}`,
+        createdBy: req.user._id,
+      }], { session });
+
+      const vendorDetails = await Vendor.findById(bill.vendorId).session(session);
+
+      await VendorLedgerEntry.create([{
+        companyId: req.user.companyId || null,
+        branchId: req.user.branchId || null,
+        vendorId: bill.vendorId,
+        type: 'PaymentMade',
+        referenceId: payment[0]._id,
+        description: `Payment Made (${mode || 'Bank'})`,
+        debit: payAmount,
+        balance: vendorDetails.outstandingBalance,
+      }], { session });
     }
 
     await session.commitTransaction();

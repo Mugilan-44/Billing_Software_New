@@ -109,6 +109,7 @@ export const getDashboardSummary = async (req, res) => {
             lowStockCount,
             topCustomers,
             paymentModeBreakdownData,
+            inventoryValueData,
 
             // Period Sales
             todaySales,
@@ -143,7 +144,7 @@ export const getDashboardSummary = async (req, res) => {
             ]),
             Vendor.aggregate([
                 { $match: { companyId: companyObjId } },
-                { $group: { _id: null, total: { $sum: '$openingBalance' } } }
+                { $group: { _id: null, total: { $sum: '$outstandingBalance' } } }
             ]),
             Expense.aggregate([
                 { $match: { companyId: companyObjId, date: { $gte: currentYearStart } } }, 
@@ -250,6 +251,10 @@ export const getDashboardSummary = async (req, res) => {
                     }
                 }
             ]),
+            Item.aggregate([
+                { $match: { companyId: companyObjId, type: 'Goods', status: 'Active' } },
+                { $group: { _id: null, totalValue: { $sum: { $multiply: [{ $max: ['$availableStock', 0] }, { $cond: { if: { $gt: ['$purchasePrice', 0] }, then: '$purchasePrice', else: '$sellingPrice' } }] } } } }
+            ]),
 
             // Period Sales Promises
             getSalesPeriodPromise(todayStart),
@@ -322,10 +327,12 @@ export const getDashboardSummary = async (req, res) => {
             percentage: totalModeAmount > 0 ? Math.round((m.totalAmount / totalModeAmount) * 100) : 0
         })).sort((a, b) => b.amount - a.amount);
 
+        const inventoryValue = inventoryValueData && inventoryValueData.length > 0 ? inventoryValueData[0].totalValue : 0;
+
         res.json({
             success: true,
             data: {
-                totalSales, totalPurchases, totalReceivables, currentReceivables, totalPayables, totalExpenses, netGstPayable, totalReceived,
+                totalSales, totalPurchases, totalReceivables, currentReceivables, totalPayables, totalExpenses, netGstPayable, totalReceived, inventoryValue,
                 recentInvoices, lowStockItems: lowStockItemsList, lowStockCount,
                 topCustomers,
                 overdueBreakdown,

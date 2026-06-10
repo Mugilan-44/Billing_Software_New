@@ -160,10 +160,12 @@ router.get('/challans/:id', async (req, res) => {
 router.get('/purchase-bills/:id', async (req, res) => {
     try {
         const PurchaseBill = mongoose.model('PurchaseBill');
+        const PurchasePayment = mongoose.model('PurchasePayment');
         const bill = await PurchaseBill.findById(req.params.id).populate('vendorId');
         if (!bill) return res.status(404).json({ success: false, message: 'Bill not found' });
         const settings = await CompanySettings.findOne({ companyId: bill.companyId });
-        res.json({ success: true, data: { bill, settings } });
+        const payments = await PurchasePayment.find({ purchaseBillId: bill._id }).sort({ date: -1 });
+        res.json({ success: true, data: { bill, settings, payments } });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Server error' });
     }

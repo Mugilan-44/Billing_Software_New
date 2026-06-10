@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from '../utils/api';
 import { API_URL } from '../utils/api';
-import { ArrowLeft, Download, Share2, Printer, Edit, Trash2, Mail, Copy } from 'lucide-react';
+import { ArrowLeft, Download, Share2, Printer, Edit, Trash2, Mail, Copy, CreditCard, X, CheckCircle } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import { getImageUrl, getViewerTaxBreakdown } from './InvoiceViewer';
 import ActionDropdown from '../components/ActionDropdown';
@@ -33,6 +33,14 @@ const PurchaseBillViewer = () => {
     const [emailTo, setEmailTo] = useState('');
     const [emailSubject, setEmailSubject] = useState('');
     const [emailMessage, setEmailMessage] = useState('');
+    
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+    const [paymentAmount, setPaymentAmount] = useState('');
+    const [paymentMode, setPaymentMode] = useState('Bank');
+    const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
+    const [paymentRef, setPaymentRef] = useState('');
+    const [recordingPayment, setRecordingPayment] = useState(false);
+
     const quoteRef = useRef(null);
 
     const handleDeleteBill = async () => {
@@ -48,19 +56,45 @@ const PurchaseBillViewer = () => {
         }
     };
 
-    useEffect(() => {
-        const fetchBill = async () => {
-            try {
-                const res = await axios.get(`/api/public/purchase-bills/${id}`);
-                setBillData(res.data.data);
-            } catch (err) {
-                console.error("Error fetching purchase bill", err);
-            } finally {
-                setLoading(false);
+    const fetchBill = async () => {
+        try {
+            const res = await axios.get(`/api/public/purchase-bills/${id}`);
+            setBillData(res.data.data);
+            const billBalance = res.data.data?.bill?.balanceDue;
+            if (billBalance !== undefined) {
+                setPaymentAmount(billBalance);
             }
-        };
+        } catch (err) {
+            console.error("Error fetching purchase bill", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchBill();
     }, [id]);
+
+    const handleRecordPaymentSubmit = async (e) => {
+        e.preventDefault();
+        setRecordingPayment(true);
+        try {
+            await axios.post(`/api/purchase-bills/${id}/pay`, {
+                amount: Number(paymentAmount),
+                mode: paymentMode,
+                date: paymentDate,
+                reference: paymentRef
+            });
+            showToast('Payment recorded successfully!', 'success');
+            setIsPaymentModalOpen(false);
+            fetchBill();
+        } catch (err) {
+            console.error('Error recording payment', err);
+            showToast(err.response?.data?.message || 'Failed to record payment', 'error');
+        } finally {
+            setRecordingPayment(false);
+        }
+    };
 
     const handleDownloadPDF = () => {
         setDownloading(true);
@@ -158,6 +192,12 @@ const PurchaseBillViewer = () => {
                                     )}
                                 </button>
                                 
+                                {['Unpaid', 'Partial', 'Partially Paid', 'Overdue'].includes(bill.status) && (
+                                    <button onClick={() => setIsPaymentModalOpen(true)} className="flex items-center gap-1 px-2 py-1 bg-white border border-slate-300 rounded-md text-emerald-600 hover:text-emerald-700 hover:border-emerald-300 hover:bg-emerald-50 transition-all shadow-sm font-semibold text-[11px]" title="Record Payment">
+                                        <CreditCard size={12} /> Record Payment
+                                    </button>
+                                )}
+
                                 <button onClick={() => navigate(`/purchase-bills/${bill._id}/edit`)} className="flex items-center gap-1 px-2 py-1 bg-white border border-slate-300 rounded-md text-slate-600 hover:text-[#2f62ff] hover:border-[#2f62ff] hover:bg-slate-50 transition-all shadow-sm font-semibold text-[11px]" title="Edit Purchase Bill">
                                     <Edit size={12} /> Edit
                                 </button>
@@ -249,10 +289,23 @@ const PurchaseBillViewer = () => {
                                     <span>₹{(row.amount || 0).toFixed(2)}</span>
                                 </div>
                             ))}
-                            <div className="flex justify-between text-lg font-bold text-slate-900 border-t border-slate-200 pt-3 mt-3">
-                                <span>Bill Total</span>
-                                <span className="text-rose-600">₹{(bill.grandTotal || 0).toFixed(2)}</span>
+                            <div className="flex justify-between items-center text-rose-600 font-bold border-t border-slate-200 mt-2 pt-3 text-lg">
+                                <span>Grand Total</span>
+                                <span>₹{(bill.grandTotal || 0).toFixed(2)}</span>
                             </div>
+
+                            {bill.amountPaid > 0 && (
+                                <div className="flex justify-between items-center text-emerald-600 font-medium text-sm mt-1">
+                                    <span>Amount Paid</span>
+                                    <span>- ₹{(bill.amountPaid || 0).toFixed(2)}</span>
+                                </div>
+                            )}
+                            {bill.balanceDue > 0 && (
+                                <div className="flex justify-between items-center text-slate-800 font-bold text-sm mt-1 border-t border-slate-100 pt-1">
+                                    <span>Balance Due</span>
+                                    <span>₹{(bill.balanceDue || 0).toFixed(2)}</span>
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -306,6 +359,40 @@ const PurchaseBillViewer = () => {
                     )}
                 </div>
             </div>
+
+            {/* Payment History Section */}
+            {billData.payments && billData.payments.length > 0 && (
+                <div className="w-full max-w-4xl mx-auto mt-8 bg-white p-8 rounded-md shadow-sm border border-slate-200 font-sans">
+                    <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+                        <CheckCircle size={20} className="text-emerald-500" />
+                        Payment History
+                    </h3>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="border-b border-slate-200 text-slate-500 text-sm">
+                                    <th className="py-3 font-semibold">Date</th>
+                                    <th className="py-3 font-semibold">Payment #</th>
+                                    <th className="py-3 font-semibold">Mode</th>
+                                    <th className="py-3 font-semibold">Reference</th>
+                                    <th className="py-3 font-semibold text-right">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody className="text-sm">
+                                {billData.payments.map((payment, idx) => (
+                                    <tr key={idx} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+                                        <td className="py-4 text-slate-700">{new Date(payment.date).toLocaleDateString()}</td>
+                                        <td className="py-4 font-medium text-slate-900">{payment.paymentNumber}</td>
+                                        <td className="py-4 text-slate-600">{payment.mode || 'N/A'}</td>
+                                        <td className="py-4 text-slate-600">{payment.reference || '-'}</td>
+                                        <td className="py-4 text-right font-bold text-emerald-600">₹{(payment.amount || 0).toFixed(2)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
 
             {/* Email Modal */}
             {isEmailModalOpen && (
@@ -381,6 +468,83 @@ const PurchaseBillViewer = () => {
                                 )}
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Record Payment Modal */}
+            {isPaymentModalOpen && (
+                <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+                        <div className="flex justify-between items-center p-5 border-b border-slate-100 bg-slate-50">
+                            <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <CreditCard size={20} className="text-[#2f62ff]" /> Record Payment
+                            </h3>
+                            <button onClick={() => setIsPaymentModalOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <form onSubmit={handleRecordPaymentSubmit} className="p-6 space-y-5">
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1">Amount (₹)</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    max={bill.balanceDue}
+                                    required
+                                    value={paymentAmount}
+                                    onChange={(e) => setPaymentAmount(e.target.value)}
+                                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#2f62ff]/20 focus:border-[#2f62ff] outline-none transition-all"
+                                    placeholder="Enter amount"
+                                />
+                                <p className="text-xs text-slate-500 mt-1">Balance Due: ₹{(bill.balanceDue || 0).toFixed(2)}</p>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1">Payment Date</label>
+                                    <input
+                                        type="date"
+                                        required
+                                        value={paymentDate}
+                                        onChange={(e) => setPaymentDate(e.target.value)}
+                                        className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#2f62ff]/20 focus:border-[#2f62ff] outline-none transition-all"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1">Payment Mode</label>
+                                    <select
+                                        value={paymentMode}
+                                        onChange={(e) => setPaymentMode(e.target.value)}
+                                        className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#2f62ff]/20 focus:border-[#2f62ff] outline-none transition-all"
+                                    >
+                                        <option value="Cash">Cash</option>
+                                        <option value="Bank">Bank Transfer</option>
+                                        <option value="UPI">UPI / QR</option>
+                                        <option value="Cheque">Cheque</option>
+                                        <option value="Credit">Credit</option>
+                                        <option value="Card">Card</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1">Reference Number <span className="text-slate-400 font-normal">(Optional)</span></label>
+                                <input
+                                    type="text"
+                                    value={paymentRef}
+                                    onChange={(e) => setPaymentRef(e.target.value)}
+                                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#2f62ff]/20 focus:border-[#2f62ff] outline-none transition-all"
+                                    placeholder="Txn ID, Cheque No. etc."
+                                />
+                            </div>
+                            <div className="pt-2 flex gap-3">
+                                <button type="button" onClick={() => setIsPaymentModalOpen(false)} className="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold transition-colors">
+                                    Cancel
+                                </button>
+                                <button type="submit" disabled={recordingPayment} className="flex-1 px-4 py-2.5 bg-[#2f62ff] hover:bg-[#1e50e2] text-white rounded-lg font-semibold transition-colors disabled:opacity-70 flex justify-center items-center">
+                                    {recordingPayment ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'Record Payment'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}
