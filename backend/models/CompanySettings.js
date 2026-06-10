@@ -58,6 +58,10 @@ const companySettingsSchema = new mongoose.Schema({
         type: String,
         default: 'light'
     },
+    showWatermark: {
+        type: Boolean,
+        default: true
+    },
     numberingSettings: {
         invoice: {
             withTax: { auto: { type: Boolean, default: true }, prefix: { type: String, default: 'INV-WT-' }, nextNumber: { type: Number, default: 1 }, digits: { type: Number, default: 4 } },
