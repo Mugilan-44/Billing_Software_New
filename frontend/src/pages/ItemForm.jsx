@@ -86,10 +86,7 @@ const ItemForm = () => {
             setError('Selling Price (Item Rate) is required and must be greater than 0');
             return;
         }
-        if (form.availableStock === undefined || form.availableStock === null || Number(form.availableStock) < 1) {
-            setError('Available Stock is required and must be at least 1');
-            return;
-        }
+
 
         setLoading(true);
         setError('');
