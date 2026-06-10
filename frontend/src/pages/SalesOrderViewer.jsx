@@ -5,6 +5,7 @@ import { API_URL } from '../utils/api';
 import { ArrowLeft, Download, Share2, Edit, Mail, Printer, FileCheck, Trash2 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import { getImageUrl, getViewerTaxBreakdown } from './InvoiceViewer';
+import ActionDropdown from '../components/ActionDropdown';
 
 const formatCustomerAddress = (addr, flatFallback) => {
     if (!addr) return flatFallback || '';
@@ -121,21 +122,19 @@ const SalesOrderViewer = () => {
                         <Edit size={20} />
                     </button>
 
-                    <button onClick={handleDeleteOrder} className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-600 hover:text-red-600 hover:border-red-200 transition-all shadow-sm" title="Delete Sales Order">
-                        <Trash2 size={20} />
-                    </button>
+                    <ActionDropdown>
+                        <button onClick={() => window.print()}>
+                            <Printer size={20} /> Print Order
+                        </button>
+                        <button onClick={handleSendEmail}>
+                            <Mail size={20} /> Email Order
+                        </button>
+                        <button onClick={handleDeleteOrder} className="text-red-600">
+                            <Trash2 size={20} /> Delete Order
+                        </button>
+                    </ActionDropdown>
 
-                    <button onClick={() => window.print()} className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm" title="Print Sales Order">
-                        <Printer size={20} />
-                    </button>
-
-                    <button onClick={handleSendEmail} className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm" title="Share via Email">
-                        <Mail size={20} />
-                    </button>
-
-
-
-                    <button onClick={handleDownloadPDF} disabled={downloading} className="flex items-center gap-2 px-5 py-3 bg-blue-600 text-white rounded-2xl font-bold text-sm shadow-lg hover:bg-blue-700 transition-all disabled:opacity-75">
+                    <button onClick={handleDownloadPDF} disabled={downloading} className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-medium text-sm shadow-sm transition-all disabled:opacity-75">
                         {downloading ? (
                             <>
                                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -143,7 +142,7 @@ const SalesOrderViewer = () => {
                             </>
                         ) : (
                             <>
-                                <Download size={18} /> Download
+                                <Download size={16} /> Download
                             </>
                         )}
                     </button>

@@ -308,29 +308,27 @@ const QuotationViewer = () => {
                     </ActionDropdown>
 
                     {quote.status === 'Draft' && (
-                        <button onClick={handleMarkAsSent} className="flex items-center gap-2 px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-bold text-sm shadow-md transition-all">
-                            <Send size={18} /> Mark as Sent
+                        <button onClick={handleMarkAsSent} className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-medium text-sm shadow-sm transition-all">
+                            <Send size={16} /> Mark as Sent
                         </button>
                     )}
 
                     {(quote.status === 'Draft' || quote.status === 'Sent') && (
                         <>
-                            <button onClick={handleAccept} className="flex items-center gap-2 px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-sm shadow-lg transition-all">
-                                <Check size={18} /> Accept
+                            <button onClick={handleAccept} className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-medium text-sm shadow-sm transition-all">
+                                <Check size={16} /> Accept
                             </button>
-                            <button onClick={handleReject} className="flex items-center gap-2 px-5 py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl font-bold text-sm shadow-lg transition-all">
-                                <X size={18} /> Reject
+                            <button onClick={handleReject} className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-xl font-medium text-sm shadow-sm transition-all">
+                                <X size={16} /> Reject
                             </button>
                         </>
                     )}
 
-                    <button onClick={() => navigate(`/invoices/new?quoteId=${quote._id}`)} className="flex items-center gap-2 px-5 py-3 bg-indigo-600 text-white rounded-2xl font-bold text-sm shadow-lg hover:bg-indigo-700 transition-all">
-                        <ClipboardList size={18} /> Convert to Invoice
+                    <button onClick={() => navigate(`/invoices/new?quoteId=${quote._id}`)} className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-medium text-sm shadow-sm transition-all">
+                        <ClipboardList size={16} /> Convert to Invoice
                     </button>
 
-
-
-                    <button onClick={handleDownloadPDF} disabled={downloading} className="flex items-center gap-2 px-5 py-3 bg-blue-600 text-white rounded-2xl font-bold text-sm shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all disabled:opacity-75">
+                    <button onClick={handleDownloadPDF} disabled={downloading} className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-medium text-sm shadow-sm transition-all disabled:opacity-75">
                         {downloading ? (
                             <>
                                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -338,7 +336,7 @@ const QuotationViewer = () => {
                             </>
                         ) : (
                             <>
-                                <Download size={18} /> Download
+                                <Download size={16} /> Download
                             </>
                         )}
                     </button>

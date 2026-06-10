@@ -30,11 +30,45 @@ export function getViewerTaxBreakdown(invoice) {
     if (totalTax <= 0) return [];
 
     if (invoice.taxType === 'GST') {
-        const rows = [];
-        if (cgst > 0) rows.push({ label: 'CGST', amount: cgst });
-        if (sgst > 0) rows.push({ label: 'SGST', amount: sgst });
-        if (igst > 0) rows.push({ label: 'IGST', amount: igst });
-        return rows;
+        const isIgst = igst > 0 && cgst === 0;
+        const items = invoice.lineItems || invoice.items || [];
+        const breakdown = {};
+        
+        items.forEach(item => {
+            const qty = item.quantity || 0;
+            const rate = item.rate || 0;
+            const discountPercent = item.discountPercent || 0;
+            const taxRate = item.gstPercent ?? item.gstPercentage ?? 0;
+            if (taxRate <= 0) return;
+
+            const rawAmount = qty * rate;
+            const discountAmount = rawAmount * (discountPercent / 100);
+            const taxableAmount = rawAmount - discountAmount;
+            const taxAmount = taxableAmount * (taxRate / 100);
+
+            if (isIgst) {
+                const label = `IGST @ ${taxRate}%`;
+                breakdown[label] = (breakdown[label] || 0) + taxAmount;
+            } else {
+                const cgstLabel = `CGST @ ${taxRate / 2}%`;
+                const sgstLabel = `SGST @ ${taxRate / 2}%`;
+                breakdown[cgstLabel] = (breakdown[cgstLabel] || 0) + (taxAmount / 2);
+                breakdown[sgstLabel] = (breakdown[sgstLabel] || 0) + (taxAmount / 2);
+            }
+        });
+
+        const rows = Object.entries(breakdown)
+            .filter(([_, amt]) => amt > 0)
+            .map(([label, amount]) => ({ label, amount }));
+
+        if (rows.length > 0) return rows;
+
+        // Fallback for flat calculation
+        const fallbackRows = [];
+        if (cgst > 0) fallbackRows.push({ label: 'CGST', amount: cgst });
+        if (sgst > 0) fallbackRows.push({ label: 'SGST', amount: sgst });
+        if (igst > 0) fallbackRows.push({ label: 'IGST', amount: igst });
+        return fallbackRows;
     }
 
     if (invoice.useProductSpecificTax) {
@@ -1396,13 +1430,13 @@ const InvoiceViewer = () => {
 
                 <div className="flex flex-wrap items-center gap-2">
                     {invoice.status === 'Draft' && (
-                        <button onClick={handleMarkAsSent} className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm shadow-md transition-all">
+                        <button onClick={handleMarkAsSent} className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-medium text-sm shadow-sm transition-all">
                             <Send size={16} /> Mark as Sent
                         </button>
                     )}
 
                     {['Sent', 'Partial', 'Partially Paid', 'Overdue'].includes(invoice.status) && (
-                        <button onClick={handleRecordPayment} className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-md transition-all">
+                        <button onClick={handleRecordPayment} className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-medium text-sm shadow-sm transition-all">
                             <CreditCard size={16} /> Record Payment
                         </button>
                     )}
@@ -1431,12 +1465,11 @@ const InvoiceViewer = () => {
                     <button
                         onClick={handleDownloadPDF}
                         disabled={downloading}
-                        className="flex items-center gap-2 px-4 py-2.5 text-white rounded-xl font-bold text-sm shadow-lg transition-all disabled:opacity-70"
-                        style={{ backgroundColor: accentColor }}
+                        className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-medium text-sm shadow-sm transition-all disabled:opacity-70"
                     >
                         {downloading
                             ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Downloading...</>
-                            : <><Download size={16} /> Download PDF</>
+                            : <><Download size={16} /> Download</>
                         }
                     </button>
                 </div>

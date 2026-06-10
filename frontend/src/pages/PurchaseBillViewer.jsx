@@ -5,6 +5,7 @@ import { API_URL } from '../utils/api';
 import { ArrowLeft, Download, Share2, Printer, Edit, Trash2, Mail, Copy } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import { getImageUrl, getViewerTaxBreakdown } from './InvoiceViewer';
+import ActionDropdown from '../components/ActionDropdown';
 
 const formatCustomerAddress = (addr, flatFallback) => {
     if (!addr) return flatFallback || '';
@@ -157,26 +158,23 @@ const PurchaseBillViewer = () => {
                         <Edit size={20} />
                     </button>
 
-                    <button onClick={handleDeleteBill} className="p-3 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-red-600 hover:border-red-200 transition-all shadow-sm" title="Delete Purchase Bill">
-                        <Trash2 size={20} />
-                    </button>
+                    <ActionDropdown>
+                        <button onClick={() => window.print()}>
+                            <Printer size={20} /> Print Bill
+                        </button>
+                        <button onClick={handleCopyDetails}>
+                            <Copy size={20} /> Copy Details
+                        </button>
+                        <button onClick={openEmailModal}>
+                            <Mail size={20} /> Send Email
+                        </button>
+                        <button onClick={handleDeleteBill} className="text-red-600">
+                            <Trash2 size={20} /> Delete Bill
+                        </button>
+                    </ActionDropdown>
 
-                    <button onClick={() => window.print()} className="p-3 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm" title="Print">
-                        <Printer size={20} />
-                    </button>
-
-                    <button onClick={handleCopyDetails} className="p-3 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm" title="Copy Details">
-                        <Copy size={20} />
-                    </button>
-
-                    <button onClick={openEmailModal} className="p-3 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm" title="Send Email">
-                        <Mail size={20} />
-                    </button>
-
-
-
-                    <button onClick={handleDownloadPDF} disabled={downloading} className="flex items-center gap-2 px-5 py-3 bg-blue-600 text-white rounded-lg font-medium text-sm shadow-sm hover:bg-blue-700 transition-all">
-                        <Download size={18} /> {downloading ? 'Downloading...' : 'Download'}
+                    <button onClick={handleDownloadPDF} disabled={downloading} className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white rounded-lg font-medium text-sm shadow-sm hover:bg-slate-900 transition-all">
+                        <Download size={16} /> {downloading ? 'Downloading...' : 'Download'}
                     </button>
                 </div>
             </div>
@@ -367,7 +365,7 @@ const PurchaseBillViewer = () => {
                             <button
                                 onClick={handleSendEmail}
                                 disabled={sendingEmail}
-                                className="px-5 py-2.5 text-white bg-blue-600 rounded-xl font-bold text-sm shadow-md transition-all hover:bg-blue-700 disabled:opacity-75 flex items-center gap-2"
+                                className="px-5 py-2.5 text-white bg-slate-800 rounded-xl font-bold text-sm shadow-md transition-all hover:bg-slate-900 disabled:opacity-75 flex items-center gap-2"
                             >
                                 {sendingEmail ? (
                                     <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Sending...</>

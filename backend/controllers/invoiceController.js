@@ -18,6 +18,7 @@ import { roundTo } from '../utils/billing.utils.js';
 import CalculationLog from '../models/CalculationLog.js';
 import { parseUTC } from '../utils/dateUtils.js';
 import Payment from '../models/Payment.js';
+import { getNextSequenceValue } from '../utils/counter.utils.js';
 import fs from 'fs';
 import path from 'path';
 import { uploadPdfToCloudinary, sendSmtpEmail } from '../utils/emailService.js';
@@ -189,6 +190,41 @@ export const createInvoice = async (req, res) => {
         credit:      0,
         balance:     roundTo(customer.outstandingBalance + totals.grandTotal.toNumber()),
       }], { session });
+
+      if (amountPaid > 0) {
+        const paymentNumber = await getNextSequenceValue('payment', 'PMT', req.user.companyId);
+        const payment = new Payment({
+          paymentNumber,
+          invoiceId: invoice._id,
+          customerId: invoice.customerId,
+          amount: amountPaid,
+          date: invoice.date,
+          paymentDate: invoice.date,
+          mode: 'Cash',
+          paymentMode: 'Cash',
+          reference: `Advance payment for Invoice ${invoice.invoiceNumber}`,
+          notes: 'Auto-generated payment from invoice creation',
+          createdBy: req.user._id,
+          ...(req.user.role !== 'SUPER_ADMIN' && {
+            companyId: req.user.companyId,
+            branchId:  req.user.branchId,
+          }),
+        });
+        await payment.save({ session });
+
+        await LedgerEntry.create([{
+          companyId: req.user.companyId || null,
+          branchId:  req.user.branchId || null,
+          customerId: invoice.customerId,
+          type: 'Payment',
+          referenceId: payment._id,
+          description: `Payment Received (Ref: ${payment.paymentNumber})`,
+          credit: amountPaid,
+          debit: 0,
+          date: invoice.date,
+          balance: 0,
+        }], { session });
+      }
 
       // Recalculate customer balances and ledger running balances safely
       await recalculateCustomerLedger(customerId, session);
@@ -394,6 +430,42 @@ export const createInvoice = async (req, res) => {
       balance: customer.outstandingBalance,
     });
     await ledgerEntry.save();
+
+    if (amountPaid > 0) {
+      const paymentNumber = await getNextSequenceValue('payment', 'PMT', req.user.companyId);
+      const payment = new Payment({
+        paymentNumber,
+        invoiceId: invoice._id,
+        customerId: invoice.customerId,
+        amount: amountPaid,
+        date: invoice.date || new Date(),
+        paymentDate: invoice.date || new Date(),
+        mode: 'Cash',
+        paymentMode: 'Cash',
+        reference: `Advance payment for Invoice ${invoice.invoiceNumber}`,
+        notes: 'Auto-generated payment from invoice creation',
+        createdBy: req.user._id,
+        ...(req.user.role !== 'SUPER_ADMIN' && {
+          companyId: req.user.companyId,
+          branchId:  req.user.branchId,
+        }),
+      });
+      await payment.save();
+
+      const ledgerEntryPay = new LedgerEntry({
+        companyId: req.user.companyId || null,
+        branchId:  req.user.branchId || null,
+        customerId: invoice.customerId,
+        type: 'Payment',
+        referenceId: payment._id,
+        description: `Payment Received (Ref: ${payment.paymentNumber})`,
+        credit: amountPaid,
+        debit: 0,
+        date: payment.date,
+        balance: 0,
+      });
+      await ledgerEntryPay.save();
+    }
 
     await generateInvoicePDF(invoice, customer, processedItems, settings).catch(() => {});
 

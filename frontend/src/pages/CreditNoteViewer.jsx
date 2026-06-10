@@ -5,6 +5,7 @@ import { API_URL } from '../utils/api';
 import { ArrowLeft, Download, Share2, Mail, Printer, Palette, Copy, AlertTriangle, Check, X } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import { getImageUrl, getViewerTaxBreakdown } from './InvoiceViewer';
+import ActionDropdown from '../components/ActionDropdown';
 
 // Color themes - credit notes default to red/orange tones or general settings
 export const COLOR_THEMES = [
@@ -235,27 +236,26 @@ const CreditNoteViewer = () => {
                         </>
                     )}
 
-                    <div className="h-8 w-px bg-slate-200 mx-1 hidden sm:block"></div>
-
-                    <button onClick={() => window.print()} className="p-2.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-red-600 hover:border-red-200 transition-all shadow-sm" title="Print">
-                        <Printer size={18} />
-                    </button>
-                    <button onClick={handleCopyDetails} className="p-2.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-red-600 hover:border-red-200 transition-all shadow-sm" title="Copy Details">
-                        <Copy size={18} />
-                    </button>
-                    <button onClick={openEmailModal} className="p-2.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-red-600 hover:border-red-200 transition-all shadow-sm" title="Send Email">
-                        <Mail size={18} />
-                    </button>
+                    <ActionDropdown>
+                        <button onClick={() => window.print()}>
+                            <Printer size={18} /> Print Note
+                        </button>
+                        <button onClick={handleCopyDetails}>
+                            <Copy size={18} /> Copy Details
+                        </button>
+                        <button onClick={openEmailModal}>
+                            <Mail size={18} /> Send Email
+                        </button>
+                    </ActionDropdown>
 
                     <button
                         onClick={handleDownloadPDF}
                         disabled={downloading}
-                        className="flex items-center gap-2 px-4 py-2.5 text-white rounded-lg font-medium text-sm shadow-sm transition-all disabled:opacity-70"
-                        style={{ backgroundColor: accentColor }}
+                        className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-medium text-sm shadow-sm transition-all disabled:opacity-70"
                     >
                         {downloading
                             ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Downloading...</>
-                            : <><Download size={16} /> Download PDF</>
+                            : <><Download size={16} /> Download</>
                         }
                     </button>
                 </div>
@@ -480,8 +480,7 @@ const CreditNoteViewer = () => {
                             <button
                                 onClick={handleSendEmail}
                                 disabled={sendingEmail}
-                                className="px-5 py-2.5 text-white rounded-xl font-bold text-sm shadow-md transition-all hover:opacity-95 disabled:opacity-75 flex items-center gap-2"
-                                style={{ backgroundColor: accentColor }}
+                                className="px-5 py-2.5 text-white bg-slate-800 rounded-xl font-bold text-sm shadow-md transition-all hover:bg-slate-900 disabled:opacity-75 flex items-center gap-2"
                             >
                                 {sendingEmail ? (
                                     <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Sending...</>
